@@ -54,8 +54,8 @@ import {
 } from "./actions";
 
 export const metadata: Metadata = {
-  title: "Owner & Staff Operations Portal | Fresh Flow Nairobi",
-  description: "Professional admin portal for order queue, client communications, financial analytics, walk-in POS, and review moderation.",
+  title: "Senior Executive Operations Portal | Fresh Flow Nairobi",
+  description: "Senior 20+ year architectural back-office portal for order tickets, financial analytics, POS walk-ins, and review moderation.",
 };
 
 type AdminPageProps = {
@@ -76,7 +76,7 @@ function formatDate(value: string) {
 
 function LoginPanel({ error }: { error?: string }) {
   return (
-    <main className="flex min-h-[calc(100vh-80px)] items-center justify-center bg-[#092341] px-4 py-12 text-white">
+    <main className="flex min-h-screen items-center justify-center bg-[#092341] px-4 py-12 text-white">
       <div className="w-full max-w-md">
         <div className="text-center">
           <Image
@@ -87,7 +87,7 @@ function LoginPanel({ error }: { error?: string }) {
             className="mx-auto h-12 w-auto brightness-110"
           />
           <h1 className="mt-4 text-2xl font-black text-white">
-            Staff & Owner Portal
+            Senior Staff Operations Console
           </h1>
           <p className="mt-1 text-xs text-white/70">
             Sign in with authorized staff credentials to access operations & financial analysis.
@@ -162,6 +162,7 @@ function LoginPanel({ error }: { error?: string }) {
 export default async function AdminPage({ searchParams }: AdminPageProps) {
   const params = await searchParams;
   const statusParam = first(params.status);
+  const activeTab = first(params.tab) || "tickets";
   const searchQuery = first(params.search) || "";
   const status = statusSteps.includes(statusParam as OrderStatus)
     ? (statusParam as OrderStatus)
@@ -209,17 +210,17 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
     : rawOrders;
 
   return (
-    <main className="bg-[#f8fafc] py-10 lg:py-14 text-[#092341]">
+    <main className="min-h-screen bg-[#f8fafc] py-10 lg:py-12 text-[#092341]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Header Bar with Walk-In POS & Sign Out */}
-        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#e2e8f0] pb-6">
+        {/* Senior Executive Command Center Header */}
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#cbd5e1] pb-6">
           <div>
             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#1363DF]">
               <ShieldCheck className="size-4" />
-              <span>Owner & Operations Control Center</span>
+              <span>Senior Executive Operations Console</span>
             </div>
             <h1 className="mt-1 text-3xl font-black text-[#092341] sm:text-4xl">
-              Platform Manager & Financial Analytics
+              Platform Command Dashboard
             </h1>
           </div>
 
@@ -234,286 +235,346 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
           </div>
         </div>
 
-        {/* FINANCIAL ANALYTICS & REVENUE REPORTING MODULE */}
-        <section className="mt-8">
-          <FinancialAnalytics orders={rawOrders} />
-        </section>
+        {/* Tab Navigation System */}
+        <div className="mt-8 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#cbd5e1] bg-white p-2 shadow-xs">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <a
+              href="/admin?tab=tickets"
+              className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-extrabold transition ${
+                activeTab === "tickets"
+                  ? "bg-[#092341] text-white shadow-md"
+                  : "text-[#475569] hover:bg-[#f8fafc] hover:text-[#092341]"
+              }`}
+            >
+              <Package className="size-4" />
+              <span>Ticket Operations ({rawOrders.length})</span>
+            </a>
 
-        {/* CUSTOMER REVIEW MODERATION SECTION */}
-        <section className="mt-10 rounded-3xl border border-[#cbd5e1] bg-white p-6 shadow-sm">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#f1f5f9] pb-4">
-            <div className="flex items-center gap-2">
-              <MessageSquareCheck className="size-5 text-[#1363DF]" />
-              <h2 className="text-xl font-extrabold text-[#092341]">
-                Customer Review Moderation ({feedbackList.length})
-              </h2>
-            </div>
-            {pendingFeedbackCount > 0 ? (
-              <span className="rounded-full bg-[#ffe823] px-3 py-1 text-xs font-extrabold text-[#092341]">
-                {pendingFeedbackCount} Pending Approval
-              </span>
-            ) : (
-              <span className="rounded-full bg-[#f0fdf4] px-3 py-1 text-xs font-bold text-[#166534]">
-                All Reviews Moderated
-              </span>
-            )}
+            <a
+              href="/admin?tab=financials"
+              className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-extrabold transition ${
+                activeTab === "financials"
+                  ? "bg-[#092341] text-white shadow-md"
+                  : "text-[#475569] hover:bg-[#f8fafc] hover:text-[#092341]"
+              }`}
+            >
+              <TrendingUp className="size-4" />
+              <span>Financial Intelligence</span>
+            </a>
+
+            <a
+              href="/admin?tab=reviews"
+              className={`inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-extrabold transition ${
+                activeTab === "reviews"
+                  ? "bg-[#092341] text-white shadow-md"
+                  : "text-[#475569] hover:bg-[#f8fafc] hover:text-[#092341]"
+              }`}
+            >
+              <MessageSquareCheck className="size-4" />
+              <span>Review Moderation ({feedbackList.length})</span>
+              {pendingFeedbackCount > 0 && (
+                <span className="rounded-full bg-[#ffe823] px-2 py-0.5 text-[10px] font-black text-[#092341]">
+                  {pendingFeedbackCount}
+                </span>
+              )}
+            </a>
           </div>
 
-          <div className="mt-4 space-y-4">
-            {feedbackList.length > 0 ? (
-              feedbackList.map((f) => (
-                <div
-                  key={f.id}
-                  className={`flex flex-wrap items-start justify-between gap-4 rounded-2xl border p-4 text-xs ${
-                    f.approved
-                      ? "border-[#e2e8f0] bg-[#f8fafc]"
-                      : "border-[#fef08a] bg-[#fefce8]"
-                  }`}
+          <div className="text-xs text-[#64748b] font-medium px-2 hidden sm:block">
+            Logged in as <strong>ops@freshflowslaundry.com</strong>
+          </div>
+        </div>
+
+        {/* TAB 1: TICKET OPERATIONS QUEUE */}
+        {activeTab === "tickets" && (
+          <section className="mt-8">
+            {/* Filter & Search Bar */}
+            <div className="rounded-2xl border border-[#e2e8f0] bg-white p-4 shadow-xs">
+              <form className="flex flex-wrap items-center gap-3">
+                <input type="hidden" name="tab" value="tickets" />
+                <div className="relative flex-1 min-w-[240px]">
+                  <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[#94a3b8]" />
+                  <input
+                    name="search"
+                    defaultValue={searchQuery}
+                    placeholder="Search Ticket ID, Customer Name, Phone, or Area..."
+                    className="w-full rounded-xl border border-[#cbd5e1] bg-[#f8fafc] py-2.5 pl-10 pr-4 text-xs font-medium text-[#092341] outline-none focus:border-[#1363DF] focus:bg-white"
+                  />
+                </div>
+
+                <select
+                  name="status"
+                  defaultValue={status || ""}
+                  className="rounded-xl border border-[#cbd5e1] bg-[#f8fafc] px-3.5 py-2.5 text-xs font-bold text-[#092341] outline-none focus:border-[#1363DF]"
                 >
-                  <div className="space-y-1 max-w-2xl">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-extrabold text-[#092341] text-sm">
-                        {f.customerName}
-                      </span>
-                      <span className="text-[#64748b]">({f.locationArea})</span>
-                      <div className="flex text-[#f59e0b]">
-                        {Array.from({ length: f.rating }).map((_, i) => (
-                          <Star key={i} className="size-3.5 fill-current" />
-                        ))}
+                  <option value="">All Statuses</option>
+                  {statusSteps.map((item) => (
+                    <option key={item} value={item}>
+                      {statusLabels[item]}
+                    </option>
+                  ))}
+                </select>
+
+                <button
+                  type="submit"
+                  className="inline-flex items-center gap-2 rounded-xl bg-[#092341] px-5 py-2.5 text-xs font-bold text-white transition hover:bg-[#1363DF]"
+                >
+                  <Filter className="size-3.5" />
+                  <span>Apply Filter</span>
+                </button>
+              </form>
+            </div>
+
+            {/* Orders Queue List */}
+            <div className="mt-6 space-y-6">
+              {orders.length > 0 ? (
+                orders.map((order) => (
+                  <article
+                    key={order.id}
+                    className="rounded-3xl border border-[#e2e8f0] bg-white p-6 shadow-sm transition hover:border-[#cbd5e1]"
+                  >
+                    <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[#f1f5f9] pb-4">
+                      <div>
+                        <div className="flex flex-wrap items-center gap-3">
+                          <h2 className="text-xl font-black text-[#092341]">
+                            {order.ticketId}
+                          </h2>
+                          <StatusBadge status={order.status} />
+                          <span className="text-xs font-medium text-[#94a3b8]">
+                            Created: {formatDate(order.createdAt)}
+                          </span>
+                        </div>
+
+                        <div className="mt-3 flex flex-wrap gap-4 text-xs text-[#475569]">
+                          <span className="flex items-center gap-1.5 font-bold text-[#092341]">
+                            <User className="size-3.5 text-[#1363DF]" />
+                            {order.customerName}
+                          </span>
+                          <span className="flex items-center gap-1.5">
+                            <Phone className="size-3.5 text-[#1363DF]" />
+                            {order.customerPhone}
+                          </span>
+                          <span className="flex items-center gap-1.5">
+                            <Mail className="size-3.5 text-[#1363DF]" />
+                            {order.customerEmail}
+                          </span>
+                        </div>
                       </div>
-                      <span className="rounded-md bg-[#1363DF]/10 px-2 py-0.5 font-bold text-[#1363DF]">
-                        {f.serviceType}
-                      </span>
-                      {f.approved ? (
-                        <span className="rounded-full bg-[#f0fdf4] px-2 py-0.5 font-bold text-[#166534]">
-                          ✓ Published on Homepage
+
+                      <div className="text-right">
+                        <span className="text-[10px] font-bold uppercase text-[#94a3b8]">
+                          Total Price
                         </span>
-                      ) : (
-                        <span className="rounded-full bg-[#ffe823] px-2 py-0.5 font-extrabold text-[#092341]">
-                          ⏳ Pending Approval
-                        </span>
-                      )}
+                        <p className="text-xl font-black text-[#1363DF]">
+                          {formatKes(order.priceTotalKe)}
+                        </p>
+                      </div>
                     </div>
 
-                    <p className="mt-2 text-sm italic text-[#334155]">
-                      &quot;{f.reviewText}&quot;
-                    </p>
-                    <p className="text-[10px] text-[#94a3b8]">Submitted: {formatDate(f.createdAt)}</p>
-                  </div>
+                    <div className="mt-5 grid gap-6 lg:grid-cols-12">
+                      {/* Client & Address Info */}
+                      <div className="space-y-3 rounded-2xl border border-[#e2e8f0] bg-[#f8fafc] p-4 text-xs lg:col-span-6">
+                        <div>
+                          <span className="font-bold text-[#94a3b8] uppercase text-[10px]">
+                            Service Location / Channel
+                          </span>
+                          <p className="mt-0.5 font-bold text-[#092341]">
+                            📍 {order.serviceArea} — {order.address}
+                          </p>
+                        </div>
 
-                  <div className="flex items-center gap-2">
-                    {!f.approved && (
-                      <form action={approveFeedbackAction}>
+                        <div className="grid gap-2 sm:grid-cols-2 pt-2 border-t border-[#e2e8f0]">
+                          <div>
+                            <span className="text-[#94a3b8] text-[10px] font-bold uppercase">Service / Pickup Date</span>
+                            <p className="font-medium text-[#092341]">{formatDate(order.pickupDatetime)}</p>
+                          </div>
+                          <div>
+                            <span className="text-[#94a3b8] text-[10px] font-bold uppercase">Delivery / Completion</span>
+                            <p className="font-medium text-[#092341]">{formatDate(order.deliveryDatetime)}</p>
+                          </div>
+                        </div>
+
+                        <div className="pt-2 border-t border-[#e2e8f0]">
+                          <span className="text-[#94a3b8] text-[10px] font-bold uppercase">Itemized Booked Services</span>
+                          <ul className="mt-1 space-y-1 font-semibold text-[#092341]">
+                            {order.serviceDetails.lines.map((line) => (
+                              <li key={line.id}>
+                                • {line.name} × {line.quantity} {line.unit} ({formatKes(line.lineTotalKe)})
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        {order.specialInstructions ? (
+                          <div className="pt-2 border-t border-[#e2e8f0]">
+                            <span className="text-[#94a3b8] text-[10px] font-bold uppercase">Special Instructions</span>
+                            <p className="mt-0.5 text-[#334155] italic">{order.specialInstructions}</p>
+                          </div>
+                        ) : null}
+                      </div>
+
+                      {/* Owner Status Response Form */}
+                      <form
+                        action={updateStatusAction}
+                        className="space-y-3 rounded-2xl border border-[#bfdbfe] bg-[#F0F7FF] p-4 lg:col-span-6"
+                      >
+                        <input type="hidden" name="orderId" value={order.id} />
+                        <div>
+                          <label className="block text-xs font-bold uppercase text-[#092341]">
+                            Update Order Status
+                          </label>
+                          <select
+                            name="status"
+                            defaultValue={order.status}
+                            className="mt-1.5 min-h-11 w-full rounded-xl border border-[#cbd5e1] bg-white px-3 text-xs font-bold text-[#092341] outline-none focus:border-[#1363DF]"
+                          >
+                            {statusSteps.map((item) => (
+                              <option key={item} value={item}>
+                                {statusLabels[item]}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold uppercase text-[#092341]">
+                            Customer Progress Note
+                          </label>
+                          <textarea
+                            name="notes"
+                            rows={3}
+                            placeholder="e.g. House cleaning completed. Team finalized inspection..."
+                            className="mt-1.5 w-full rounded-xl border border-[#cbd5e1] bg-white p-3 text-xs text-[#092341] outline-none focus:border-[#1363DF]"
+                          />
+                        </div>
+
+                        <button
+                          type="submit"
+                          className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#1363DF] px-4 text-xs font-extrabold text-white shadow-md transition hover:bg-[#0F4C81]"
+                        >
+                          <Send className="size-4" />
+                          <span>Update Status & Send Receipt Email</span>
+                        </button>
+                      </form>
+                    </div>
+                  </article>
+                ))
+              ) : (
+                <div className="rounded-3xl border border-[#e2e8f0] bg-white p-12 text-center text-[#64748b]">
+                  <Package className="mx-auto size-10 text-[#cbd5e1]" />
+                  <p className="mt-3 text-base font-bold text-[#092341]">No orders matched those filters.</p>
+                  <p className="mt-1 text-xs">Try clearing your search query or status filter.</p>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+
+        {/* TAB 2: FINANCIAL INTELLIGENCE */}
+        {activeTab === "financials" && (
+          <section className="mt-8">
+            <FinancialAnalytics orders={rawOrders} />
+          </section>
+        )}
+
+        {/* TAB 3: CUSTOMER REVIEW MODERATION */}
+        {activeTab === "reviews" && (
+          <section className="mt-8 rounded-3xl border border-[#cbd5e1] bg-white p-6 shadow-sm lg:p-8">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#f1f5f9] pb-4">
+              <div className="flex items-center gap-2">
+                <MessageSquareCheck className="size-5 text-[#1363DF]" />
+                <h2 className="text-xl font-extrabold text-[#092341]">
+                  Customer Review Moderation ({feedbackList.length})
+                </h2>
+              </div>
+              {pendingFeedbackCount > 0 ? (
+                <span className="rounded-full bg-[#ffe823] px-3 py-1 text-xs font-extrabold text-[#092341]">
+                  {pendingFeedbackCount} Pending Approval
+                </span>
+              ) : (
+                <span className="rounded-full bg-[#f0fdf4] px-3 py-1 text-xs font-bold text-[#166534]">
+                  All Reviews Moderated
+                </span>
+              )}
+            </div>
+
+            <div className="mt-4 space-y-4">
+              {feedbackList.length > 0 ? (
+                feedbackList.map((f) => (
+                  <div
+                    key={f.id}
+                    className={`flex flex-wrap items-start justify-between gap-4 rounded-2xl border p-4 text-xs ${
+                      f.approved
+                        ? "border-[#e2e8f0] bg-[#f8fafc]"
+                        : "border-[#fef08a] bg-[#fefce8]"
+                    }`}
+                  >
+                    <div className="space-y-1 max-w-2xl">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-extrabold text-[#092341] text-sm">
+                          {f.customerName}
+                        </span>
+                        <span className="text-[#64748b]">({f.locationArea})</span>
+                        <div className="flex text-[#f59e0b]">
+                          {Array.from({ length: f.rating }).map((_, i) => (
+                            <Star key={i} className="size-3.5 fill-current" />
+                          ))}
+                        </div>
+                        <span className="rounded-md bg-[#1363DF]/10 px-2 py-0.5 font-bold text-[#1363DF]">
+                          {f.serviceType}
+                        </span>
+                        {f.approved ? (
+                          <span className="rounded-full bg-[#f0fdf4] px-2 py-0.5 font-bold text-[#166534]">
+                            ✓ Published on Homepage
+                          </span>
+                        ) : (
+                          <span className="rounded-full bg-[#ffe823] px-2 py-0.5 font-extrabold text-[#092341]">
+                            ⏳ Pending Approval
+                          </span>
+                        )}
+                      </div>
+
+                      <p className="mt-2 text-sm italic text-[#334155]">
+                        &quot;{f.reviewText}&quot;
+                      </p>
+                      <p className="text-[10px] text-[#94a3b8]">Submitted: {formatDate(f.createdAt)}</p>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      {!f.approved && (
+                        <form action={approveFeedbackAction}>
+                          <input type="hidden" name="feedbackId" value={f.id} />
+                          <button
+                            type="submit"
+                            className="inline-flex items-center gap-1.5 rounded-xl bg-[#16a34a] px-3.5 py-2 font-bold text-white transition hover:bg-[#15803d]"
+                          >
+                            <CheckCircle2 className="size-3.5" />
+                            <span>Approve & Publish</span>
+                          </button>
+                        </form>
+                      )}
+
+                      <form action={deleteFeedbackAction}>
                         <input type="hidden" name="feedbackId" value={f.id} />
                         <button
                           type="submit"
-                          className="inline-flex items-center gap-1.5 rounded-xl bg-[#16a34a] px-3.5 py-2 font-bold text-white transition hover:bg-[#15803d]"
+                          className="inline-flex items-center gap-1.5 rounded-xl border border-[#cbd5e1] bg-white px-3 py-2 font-bold text-[#991b1b] transition hover:bg-[#fef2f2] hover:border-[#fecaca]"
                         >
-                          <CheckCircle2 className="size-3.5" />
-                          <span>Approve & Publish</span>
+                          <Trash2 className="size-3.5" />
+                          <span>Delete</span>
                         </button>
                       </form>
-                    )}
-
-                    <form action={deleteFeedbackAction}>
-                      <input type="hidden" name="feedbackId" value={f.id} />
-                      <button
-                        type="submit"
-                        className="inline-flex items-center gap-1.5 rounded-xl border border-[#cbd5e1] bg-white px-3 py-2 font-bold text-[#991b1b] transition hover:bg-[#fef2f2] hover:border-[#fecaca]"
-                      >
-                        <Trash2 className="size-3.5" />
-                        <span>Delete</span>
-                      </button>
-                    </form>
+                    </div>
                   </div>
-                </div>
-              ))
-            ) : (
-              <p className="py-4 text-center text-xs text-[#64748b]">
-                No customer reviews submitted yet.
-              </p>
-            )}
-          </div>
-        </section>
-
-        {/* Filter & Search Bar */}
-        <div className="mt-10 rounded-2xl border border-[#e2e8f0] bg-white p-4 shadow-xs">
-          <form className="flex flex-wrap items-center gap-3">
-            <div className="relative flex-1 min-w-[240px]">
-              <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[#94a3b8]" />
-              <input
-                name="search"
-                defaultValue={searchQuery}
-                placeholder="Search Ticket ID, Customer Name, Phone, or Area..."
-                className="w-full rounded-xl border border-[#cbd5e1] bg-[#f8fafc] py-2.5 pl-10 pr-4 text-xs font-medium text-[#092341] outline-none focus:border-[#1363DF] focus:bg-white"
-              />
+                ))
+              ) : (
+                <p className="py-4 text-center text-xs text-[#64748b]">
+                  No customer reviews submitted yet.
+                </p>
+              )}
             </div>
-
-            <select
-              name="status"
-              defaultValue={status || ""}
-              className="rounded-xl border border-[#cbd5e1] bg-[#f8fafc] px-3.5 py-2.5 text-xs font-bold text-[#092341] outline-none focus:border-[#1363DF]"
-            >
-              <option value="">All Statuses</option>
-              {statusSteps.map((item) => (
-                <option key={item} value={item}>
-                  {statusLabels[item]}
-                </option>
-              ))}
-            </select>
-
-            <button
-              type="submit"
-              className="inline-flex items-center gap-2 rounded-xl bg-[#092341] px-5 py-2.5 text-xs font-bold text-white transition hover:bg-[#1363DF]"
-            >
-              <Filter className="size-3.5" />
-              <span>Apply Filter</span>
-            </button>
-          </form>
-        </div>
-
-        {/* Orders Queue List */}
-        <div className="mt-6 space-y-6">
-          {orders.length > 0 ? (
-            orders.map((order) => (
-              <article
-                key={order.id}
-                className="rounded-3xl border border-[#e2e8f0] bg-white p-6 shadow-sm transition hover:border-[#cbd5e1]"
-              >
-                <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[#f1f5f9] pb-4">
-                  <div>
-                    <div className="flex flex-wrap items-center gap-3">
-                      <h2 className="text-xl font-black text-[#092341]">
-                        {order.ticketId}
-                      </h2>
-                      <StatusBadge status={order.status} />
-                      <span className="text-xs font-medium text-[#94a3b8]">
-                        Created: {formatDate(order.createdAt)}
-                      </span>
-                    </div>
-
-                    <div className="mt-3 flex flex-wrap gap-4 text-xs text-[#475569]">
-                      <span className="flex items-center gap-1.5 font-bold text-[#092341]">
-                        <User className="size-3.5 text-[#1363DF]" />
-                        {order.customerName}
-                      </span>
-                      <span className="flex items-center gap-1.5">
-                        <Phone className="size-3.5 text-[#1363DF]" />
-                        {order.customerPhone}
-                      </span>
-                      <span className="flex items-center gap-1.5">
-                        <Mail className="size-3.5 text-[#1363DF]" />
-                        {order.customerEmail}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="text-right">
-                    <span className="text-[10px] font-bold uppercase text-[#94a3b8]">
-                      Total Price
-                    </span>
-                    <p className="text-xl font-black text-[#1363DF]">
-                      {formatKes(order.priceTotalKe)}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-5 grid gap-6 lg:grid-cols-12">
-                  {/* Client & Address Info */}
-                  <div className="space-y-3 rounded-2xl border border-[#e2e8f0] bg-[#f8fafc] p-4 text-xs lg:col-span-6">
-                    <div>
-                      <span className="font-bold text-[#94a3b8] uppercase text-[10px]">
-                        Service Location / Channel
-                      </span>
-                      <p className="mt-0.5 font-bold text-[#092341]">
-                        📍 {order.serviceArea} — {order.address}
-                      </p>
-                    </div>
-
-                    <div className="grid gap-2 sm:grid-cols-2 pt-2 border-t border-[#e2e8f0]">
-                      <div>
-                        <span className="text-[#94a3b8] text-[10px] font-bold uppercase">Service / Pickup Date</span>
-                        <p className="font-medium text-[#092341]">{formatDate(order.pickupDatetime)}</p>
-                      </div>
-                      <div>
-                        <span className="text-[#94a3b8] text-[10px] font-bold uppercase">Delivery / Completion</span>
-                        <p className="font-medium text-[#092341]">{formatDate(order.deliveryDatetime)}</p>
-                      </div>
-                    </div>
-
-                    <div className="pt-2 border-t border-[#e2e8f0]">
-                      <span className="text-[#94a3b8] text-[10px] font-bold uppercase">Itemized Booked Services</span>
-                      <ul className="mt-1 space-y-1 font-semibold text-[#092341]">
-                        {order.serviceDetails.lines.map((line) => (
-                          <li key={line.id}>
-                            • {line.name} × {line.quantity} {line.unit} ({formatKes(line.lineTotalKe)})
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    {order.specialInstructions ? (
-                      <div className="pt-2 border-t border-[#e2e8f0]">
-                        <span className="text-[#94a3b8] text-[10px] font-bold uppercase">Special Instructions</span>
-                        <p className="mt-0.5 text-[#334155] italic">{order.specialInstructions}</p>
-                      </div>
-                    ) : null}
-                  </div>
-
-                  {/* Owner Status Response Form */}
-                  <form
-                    action={updateStatusAction}
-                    className="space-y-3 rounded-2xl border border-[#bfdbfe] bg-[#F0F7FF] p-4 lg:col-span-6"
-                  >
-                    <input type="hidden" name="orderId" value={order.id} />
-                    <div>
-                      <label className="block text-xs font-bold uppercase text-[#092341]">
-                        Update Order Status
-                      </label>
-                      <select
-                        name="status"
-                        defaultValue={order.status}
-                        className="mt-1.5 min-h-11 w-full rounded-xl border border-[#cbd5e1] bg-white px-3 text-xs font-bold text-[#092341] outline-none focus:border-[#1363DF]"
-                      >
-                        {statusSteps.map((item) => (
-                          <option key={item} value={item}>
-                            {statusLabels[item]}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold uppercase text-[#092341]">
-                        Customer Update / Progress Note
-                      </label>
-                      <textarea
-                        name="notes"
-                        rows={3}
-                        placeholder="e.g. House cleaning completed. Team finalized inspection..."
-                        className="mt-1.5 w-full rounded-xl border border-[#cbd5e1] bg-white p-3 text-xs text-[#092341] outline-none focus:border-[#1363DF]"
-                      />
-                    </div>
-
-                    <button
-                      type="submit"
-                      className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#1363DF] px-4 text-xs font-extrabold text-white shadow-md transition hover:bg-[#0F4C81]"
-                    >
-                      <Send className="size-4" />
-                      <span>Update Status & Send Receipt Email</span>
-                    </button>
-                  </form>
-                </div>
-              </article>
-            ))
-          ) : (
-            <div className="rounded-3xl border border-[#e2e8f0] bg-white p-12 text-center text-[#64748b]">
-              <Package className="mx-auto size-10 text-[#cbd5e1]" />
-              <p className="mt-3 text-base font-bold text-[#092341]">No orders matched those filters.</p>
-              <p className="mt-1 text-xs">Try clearing your search query or status filter.</p>
-            </div>
-          )}
-        </div>
+          </section>
+        )}
       </div>
     </main>
   );

@@ -158,7 +158,7 @@ export default async function Home() {
               Complete Service Portfolio
             </span>
             <h2 className="mt-2 text-3xl font-black text-[#092341] sm:text-5xl tracking-tight">
-              4 Core Service Divisions
+              Integrated Garment & Home Care Divisions
             </h2>
             <p className="mt-4 text-base leading-relaxed text-[#64748b]">
               From everyday laundry and suit dry cleaning to deep house sanitization, carpet stain extraction, and pest fumigation across Nairobi.

@@ -71,9 +71,13 @@ export async function createBookingAction(
       ),
     );
 
+    const issuesList = Object.entries(fieldErrors)
+      .map(([field, msg]) => `${field.toUpperCase()}: ${msg}`)
+      .join(" | ");
+
     return {
       ok: false,
-      message: "Please fix the highlighted booking details.",
+      message: `Please review your booking input: ${issuesList}`,
       fieldErrors,
     };
   }

@@ -199,6 +199,27 @@ function BookingFormInner({ compact = false }: { compact?: boolean }) {
     }
   }, [searchParams]);
 
+  useEffect(() => {
+    if (state.fieldErrors) {
+      if (state.fieldErrors.serviceArea) {
+        setStep(0);
+      } else if (state.fieldErrors.services) {
+        setStep(1);
+      } else if (state.fieldErrors.pickupSlot || state.fieldErrors.deliverySlot) {
+        setStep(2);
+      } else if (
+        state.fieldErrors.customerName ||
+        state.fieldErrors.customerPhone ||
+        state.fieldErrors.customerEmail ||
+        state.fieldErrors.address
+      ) {
+        setStep(3);
+      } else if (state.fieldErrors.consentUpdates || state.fieldErrors.paymentOption) {
+        setStep(4);
+      }
+    }
+  }, [state.fieldErrors]);
+
   const quote = useMemo(
     () =>
       calculateQuote(
