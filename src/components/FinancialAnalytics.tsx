@@ -23,14 +23,14 @@ import {
 } from "lucide-react";
 import { updatePaymentStatusAction } from "@/app/admin/actions";
 import { formatKes, paymentOptions } from "@/lib/business";
-import { serviceCatalog } from "@/lib/pricing";
+import { serviceCategories } from "@/lib/pricing";
 import type { Order } from "@/lib/orders";
 
 type FinancialAnalyticsProps = {
   orders: Order[];
 };
 
-type Timeframe = "weekly" | "monthly" | "quarterly" | "yearly";
+type Timeframe = "today" | "7days" | "30days";
 type LedgerFilter = "all" | "paid" | "unpaid";
 
 function formatDate(value: string) {
@@ -42,14 +42,14 @@ function formatDate(value: string) {
 }
 
 export function FinancialAnalytics({ orders }: FinancialAnalyticsProps) {
-  const [timeframe, setTimeframe] = useState<Timeframe>("monthly");
+  const [timeframe, setTimeframe] = useState<Timeframe>("30days");
   const [ledgerFilter, setLedgerFilter] = useState<LedgerFilter>("all");
-  const [selectedServiceFilter, setSelectedServiceFilter] = useState<string>("all");
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>("all");
   const [specificDateFilter, setSpecificDateFilter] = useState<string>("");
 
   const now = new Date();
 
-  // Filter orders by selected timeframe, specific calendar date, AND selected service
+  // Filter orders by selected timeframe, specific calendar date, AND selected service category
   const filteredOrders = useMemo(() => {
     return orders.filter((o) => {
       const created = new Date(o.createdAt);
@@ -62,23 +62,22 @@ export function FinancialAnalytics({ orders }: FinancialAnalyticsProps) {
         if (createdDateIso !== specificDateFilter) return false;
       } else {
         const diffDays = (now.getTime() - created.getTime()) / (1000 * 3600 * 24);
-        if (timeframe === "weekly" && diffDays > 7) return false;
-        if (timeframe === "monthly" && diffDays > 30) return false;
-        if (timeframe === "quarterly" && diffDays > 90) return false;
-        if (timeframe === "yearly" && diffDays > 365) return false;
+        if (timeframe === "today" && diffDays > 1) return false;
+        if (timeframe === "7days" && diffDays > 7) return false;
+        if (timeframe === "30days" && diffDays > 30) return false;
       }
 
-      // Filter by specific service item if selected
-      if (selectedServiceFilter !== "all") {
-        const hasService = o.serviceDetails.lines.some(
-          (l) => l.id === selectedServiceFilter || l.name === selectedServiceFilter
+      // Filter by 4 main service categories if selected
+      if (selectedCategoryFilter !== "all") {
+        const hasCategory = o.serviceDetails.lines.some(
+          (l) => (l.category || "laundry") === selectedCategoryFilter
         );
-        if (!hasService) return false;
+        if (!hasCategory) return false;
       }
 
       return true;
     });
-  }, [orders, timeframe, specificDateFilter, selectedServiceFilter]);
+  }, [orders, timeframe, specificDateFilter, selectedCategoryFilter]);
 
   // Strict Realized vs Unpaid Financial Calculations
   const metrics = useMemo(() => {
@@ -195,26 +194,33 @@ export function FinancialAnalytics({ orders }: FinancialAnalyticsProps) {
             </p>
           </div>
 
-          {/* Timeframe Filter Tabs */}
+          {/* Time Window Tabs: Today, Last 7 Days, Last 30 Days */}
           <div className="flex items-center gap-1.5 rounded-2xl border border-[#cbd5e1] bg-[#f8fafc] p-1.5">
-            {(["weekly", "monthly", "quarterly", "yearly"] as Timeframe[]).map((tf) => (
+            {[
+              { id: "today", label: "Today" },
+              { id: "7days", label: "Last 7 Days" },
+              { id: "30days", label: "Last 30 Days" },
+            ].map((tf) => (
               <button
-                key={tf}
+                key={tf.id}
                 type="button"
-                onClick={() => setTimeframe(tf)}
-                className={`rounded-xl px-3 py-1.5 text-xs font-bold capitalize transition ${
-                  timeframe === tf
+                onClick={() => {
+                  setTimeframe(tf.id as Timeframe);
+                  setSpecificDateFilter("");
+                }}
+                className={`rounded-xl px-3 py-1.5 text-xs font-bold transition ${
+                  timeframe === tf.id && !specificDateFilter
                     ? "bg-[#092341] text-[#ffe823] shadow-sm"
                     : "text-[#64748b] hover:bg-white hover:text-[#092341]"
                 }`}
               >
-                {tf}
+                {tf.label}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Calendar Day Picker & Service Item Filter Selector Bar */}
+        {/* Calendar Day Picker & Service Category Filter Selector Bar */}
         <div className="mt-5 grid gap-3 sm:grid-cols-2 rounded-2xl bg-[#F0F7FF] p-3.5 border border-[#bfdbfe]">
           {/* Specific Calendar Day Picker */}
           <div className="flex items-center gap-2">
@@ -237,29 +243,28 @@ export function FinancialAnalytics({ orders }: FinancialAnalyticsProps) {
             )}
           </div>
 
-          {/* Service Filter Dropdown */}
+          {/* Streamlined Service Category Filter Dropdown */}
           <div className="flex items-center gap-2">
             <Tag className="size-4 shrink-0 text-[#1363DF]" />
-            <span className="text-xs font-extrabold text-[#092341] shrink-0">Service Filter:</span>
+            <span className="text-xs font-extrabold text-[#092341] shrink-0">Service Category:</span>
             <select
-              value={selectedServiceFilter}
-              onChange={(e) => setSelectedServiceFilter(e.target.value)}
+              value={selectedCategoryFilter}
+              onChange={(e) => setSelectedCategoryFilter(e.target.value)}
               className="flex-1 rounded-xl border border-[#cbd5e1] bg-white px-3 py-1.5 text-xs font-bold text-[#092341] outline-none focus:border-[#1363DF]"
             >
-              <option value="all">🌟 All Services Combined</option>
-              {serviceCatalog.map((s) => (
-                <option key={s.id} value={s.id}>
-                  [{s.categoryName}] {s.name} — ({formatKes(s.priceKe)}/{s.unit})
-                </option>
-              ))}
+              <option value="all">🌟 All Categories</option>
+              <option value="laundry">🧺 Laundry & Dry Cleaning</option>
+              <option value="house_cleaning">🧹 House Cleaning</option>
+              <option value="carpet_cleaning">🛋️ Carpet Cleaning</option>
+              <option value="fumigation">🪲 Pest & Fumigation</option>
             </select>
-            {selectedServiceFilter !== "all" && (
+            {selectedCategoryFilter !== "all" && (
               <button
                 type="button"
-                onClick={() => setSelectedServiceFilter("all")}
+                onClick={() => setSelectedCategoryFilter("all")}
                 className="rounded-xl bg-[#092341] px-2.5 py-1 text-[11px] font-bold text-white hover:bg-[#1363DF]"
               >
-                Clear Service ✕
+                Clear ✕
               </button>
             )}
           </div>

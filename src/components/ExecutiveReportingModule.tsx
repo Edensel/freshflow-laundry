@@ -21,14 +21,14 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { formatKes, paymentOptions } from "@/lib/business";
-import { serviceCatalog } from "@/lib/pricing";
+import { serviceCategories } from "@/lib/pricing";
 import type { Order } from "@/lib/orders";
 
 type ExecutiveReportingModuleProps = {
   orders: Order[];
 };
 
-type DateFilter = "today" | "7days" | "30days" | "ytd" | "all";
+type DateFilter = "today" | "7days" | "30days";
 type ChannelFilter = "all" | "walkin" | "online";
 type PaymentFilter = "all" | "paid" | "unpaid";
 
@@ -52,19 +52,9 @@ export function ExecutiveReportingModule({ orders }: ExecutiveReportingModulePro
   const [specificDateFilter, setSpecificDateFilter] = useState<string>("");
   const [channelFilter, setChannelFilter] = useState<ChannelFilter>("all");
   const [paymentFilter, setPaymentFilter] = useState<PaymentFilter>("all");
-  const [areaFilter, setAreaFilter] = useState<string>("all");
-  const [serviceFilter, setServiceFilter] = useState<string>("all");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
 
   const now = new Date();
-
-  // Extract unique service areas for filtering
-  const uniqueAreas = useMemo(() => {
-    const set = new Set<string>();
-    for (const o of orders) {
-      if (o.serviceArea) set.add(o.serviceArea);
-    }
-    return Array.from(set).sort();
-  }, [orders]);
 
   // Apply Filter Criteria
   const filteredOrders = useMemo(() => {
@@ -82,7 +72,6 @@ export function ExecutiveReportingModule({ orders }: ExecutiveReportingModulePro
         if (dateFilter === "today" && diffDays > 1) return false;
         if (dateFilter === "7days" && diffDays > 7) return false;
         if (dateFilter === "30days" && diffDays > 30) return false;
-        if (dateFilter === "ytd" && created.getFullYear() !== now.getFullYear()) return false;
       }
 
       // Channel filter
@@ -97,20 +86,17 @@ export function ExecutiveReportingModule({ orders }: ExecutiveReportingModulePro
       if (paymentFilter === "paid" && !isPaid) return false;
       if (paymentFilter === "unpaid" && isPaid) return false;
 
-      // Neighborhood area filter
-      if (areaFilter !== "all" && o.serviceArea !== areaFilter) return false;
-
-      // Service item filter
-      if (serviceFilter !== "all") {
-        const hasService = o.serviceDetails.lines.some(
-          (l) => l.id === serviceFilter || l.name === serviceFilter
+      // Service Category filter (Laundry, House Cleaning, Carpet Cleaning, Fumigation)
+      if (categoryFilter !== "all") {
+        const hasCategory = o.serviceDetails.lines.some(
+          (l) => (l.category || "laundry") === categoryFilter
         );
-        if (!hasService) return false;
+        if (!hasCategory) return false;
       }
 
       return true;
     });
-  }, [orders, dateFilter, specificDateFilter, channelFilter, paymentFilter, areaFilter, serviceFilter]);
+  }, [orders, dateFilter, specificDateFilter, channelFilter, paymentFilter, categoryFilter]);
 
   // Service Revenue Leaderboard Calculation
   const serviceLeaderboard = useMemo(() => {
@@ -189,7 +175,6 @@ export function ExecutiveReportingModule({ orders }: ExecutiveReportingModulePro
       "Customer Name",
       "Phone",
       "Email",
-      "Service Area",
       "Services Selected",
       "Total KES",
       "Payment Method",
@@ -208,7 +193,6 @@ export function ExecutiveReportingModule({ orders }: ExecutiveReportingModulePro
         `"${o.customerName.replace(/"/g, '""')}"`,
         `"${o.customerPhone}"`,
         `"${o.customerEmail}"`,
-        `"${o.serviceArea}"`,
         `"${services.replace(/"/g, '""')}"`,
         o.priceTotalKe,
         `"${o.paymentOption}"`,
@@ -277,8 +261,8 @@ export function ExecutiveReportingModule({ orders }: ExecutiveReportingModulePro
           </div>
         </div>
 
-        {/* Multi-Dimensional Filter Controls */}
-        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-6 rounded-2xl border border-[#e2e8f0] bg-[#f8fafc] p-4">
+        {/* Streamlined Multi-Dimensional Filter Controls */}
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5 rounded-2xl border border-[#e2e8f0] bg-[#f8fafc] p-4">
           {/* Specific Calendar Day Picker */}
           <div>
             <label className="block text-[11px] font-extrabold uppercase text-[#1363DF]">
@@ -292,7 +276,7 @@ export function ExecutiveReportingModule({ orders }: ExecutiveReportingModulePro
             />
           </div>
 
-          {/* Time Period Filter */}
+          {/* Streamlined Time Period Filter */}
           <div>
             <label className="block text-[11px] font-extrabold uppercase text-[#64748b]">
               Time Window
@@ -308,27 +292,24 @@ export function ExecutiveReportingModule({ orders }: ExecutiveReportingModulePro
               <option value="today">Today Only</option>
               <option value="7days">Last 7 Days</option>
               <option value="30days">Last 30 Days</option>
-              <option value="ytd">Year to Date (YTD)</option>
-              <option value="all">All Historical Data</option>
             </select>
           </div>
 
-          {/* Service Filter */}
+          {/* Streamlined Service Category Filter */}
           <div>
             <label className="block text-[11px] font-extrabold uppercase text-[#64748b]">
-              Garment / Service
+              Service Category
             </label>
             <select
-              value={serviceFilter}
-              onChange={(e) => setServiceFilter(e.target.value)}
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
               className="mt-1.5 min-h-10 w-full rounded-xl border border-[#cbd5e1] bg-white px-3 text-xs font-bold text-[#092341] outline-none focus:border-[#1363DF]"
             >
-              <option value="all">🌟 All Services</option>
-              {serviceCatalog.map((s) => (
-                <option key={s.id} value={s.id}>
-                  [{s.categoryName}] {s.name}
-                </option>
-              ))}
+              <option value="all">🌟 All Categories</option>
+              <option value="laundry">🧺 Laundry & Dry Cleaning</option>
+              <option value="house_cleaning">🧹 House Cleaning</option>
+              <option value="carpet_cleaning">🛋️ Carpet Cleaning</option>
+              <option value="fumigation">🪲 Pest & Fumigation</option>
             </select>
           </div>
 
@@ -361,25 +342,6 @@ export function ExecutiveReportingModule({ orders }: ExecutiveReportingModulePro
               <option value="all">All (Paid + Unpaid)</option>
               <option value="paid">🟢 Paid Only</option>
               <option value="unpaid">⏳ Unpaid Only</option>
-            </select>
-          </div>
-
-          {/* Service Area Filter */}
-          <div>
-            <label className="block text-[11px] font-extrabold uppercase text-[#64748b]">
-              Neighborhood
-            </label>
-            <select
-              value={areaFilter}
-              onChange={(e) => setAreaFilter(e.target.value)}
-              className="mt-1.5 min-h-10 w-full rounded-xl border border-[#cbd5e1] bg-white px-3 text-xs font-bold text-[#092341] outline-none focus:border-[#1363DF]"
-            >
-              <option value="all">All Service Areas</option>
-              {uniqueAreas.map((area) => (
-                <option key={area} value={area}>
-                  {area}
-                </option>
-              ))}
             </select>
           </div>
         </div>
@@ -516,7 +478,6 @@ export function ExecutiveReportingModule({ orders }: ExecutiveReportingModulePro
                 <th className="p-3">Ticket ID</th>
                 <th className="p-3">Date</th>
                 <th className="p-3">Customer Details</th>
-                <th className="p-3">Neighborhood</th>
                 <th className="p-3">Amount (KES)</th>
                 <th className="p-3">Payment Method</th>
                 <th className="p-3">Payment Status</th>
@@ -526,7 +487,7 @@ export function ExecutiveReportingModule({ orders }: ExecutiveReportingModulePro
             <tbody className="divide-y divide-[#f1f5f9]">
               {filteredOrders.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="p-8 text-center text-[#94a3b8]">
+                  <td colSpan={7} className="p-8 text-center text-[#94a3b8]">
                     No report data found matching the selected filter rules.
                   </td>
                 </tr>
@@ -555,10 +516,6 @@ export function ExecutiveReportingModule({ orders }: ExecutiveReportingModulePro
                       <td className="p-3">
                         <span className="font-bold text-[#092341]">{o.customerName}</span>
                         <span className="block text-[10px] text-[#64748b]">{o.customerPhone}</span>
-                      </td>
-
-                      <td className="p-3 font-semibold text-[#475569]">
-                        {o.serviceArea}
                       </td>
 
                       <td className="p-3 font-black text-sm text-[#092341]">
