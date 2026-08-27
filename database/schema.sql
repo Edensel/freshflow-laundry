@@ -95,3 +95,12 @@ CREATE TRIGGER orders_set_updated_at
 BEFORE UPDATE ON orders
 FOR EACH ROW
 EXECUTE FUNCTION set_updated_at();
+
+-- SEED TEST DEMO DATA
+INSERT INTO customer_feedback (customer_name, location_area, rating, service_type, review_text, approved)
+VALUES
+  ('Jane Wanjiku', 'Kilimani', 5, 'Ironing', 'My silk blouses came back perfectly steam pressed and on wooden hangers. Exceptional express service!', true),
+  ('Peter Omondi', 'Westlands', 5, 'House Cleaning', 'The house cleaning crew was punctual, polite, and left my 2-bedroom home spotless. Highly recommended!', true),
+  ('Mercy Mutua', 'Lavington', 5, 'Carpet Cleaning', 'Extremely thorough deep foam shampooing for my living room carpets. Removed stubborn coffee stains completely.', true),
+  ('David Kiprop', 'Karen', 5, 'Fumigation', 'Pest control team arrived on time with professional gear. Odorless fumigation and zero pests remaining!', true)
+ON CONFLICT DO NOTHING;
