@@ -54,17 +54,21 @@ export default async function Home() {
         <div className="absolute right-10 top-10 -z-10 h-72 w-72 rounded-full bg-radial from-[#ffe823]/15 to-transparent blur-3xl" />
 
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8 lg:py-28">
-          <div className="mx-auto max-w-4xl text-center">
+          <div className="mx-auto max-w-5xl text-center">
             {/* Live Doorstep Eyebrow Badge */}
             <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-[#ffe823] backdrop-blur-md shadow-lg">
               <Globe className="size-4 text-[#38BDF8]" aria-hidden="true" />
               <span>Doorstep Pickup & Delivery • Nairobi, Kenya</span>
             </div>
 
-            {/* Headline H1 with Clean Line Wrapping & WCAG AA Accent */}
-            <h1 className="mt-6 text-4xl font-black tracking-tight sm:text-6xl lg:text-7xl leading-tight">
-              <span className="block text-white">One Less Thing to Worry About</span>
-              <span className="mt-1 block text-[#ffe823]">Real Care, Right at Your Door</span>
+            {/* Headline H1 with Guaranteed 2-Line Wrapping */}
+            <h1 className="mt-6 text-3xl font-black tracking-tight sm:text-5xl lg:text-6xl leading-tight">
+              <span className="block text-white sm:whitespace-nowrap">
+                One Less Thing to Worry About
+              </span>
+              <span className="mt-2 block text-[#ffe823] sm:whitespace-nowrap">
+                Real Care, Right at Your Door
+              </span>
             </h1>
 
             <p className="mt-6 text-lg leading-relaxed text-white/85 sm:text-xl max-w-3xl mx-auto font-normal">
