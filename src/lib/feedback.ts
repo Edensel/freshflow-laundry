@@ -74,38 +74,19 @@ function getDefaultInitialFeedback(): FeedbackItem[] {
   ];
 }
 
+declare global {
+  var freshFlowDemoFeedback: FeedbackItem[] | undefined;
+}
+
 async function readDemoFeedback(): Promise<FeedbackItem[]> {
-  try {
-    const raw = await readFile(demoDataPath, "utf-8");
-    const parsed = JSON.parse(raw);
-    if (parsed && Array.isArray(parsed.feedback) && parsed.feedback.length > 0) {
-      return parsed.feedback as FeedbackItem[];
-    }
-  } catch {
-    // Ignore read errors
+  if (!globalThis.freshFlowDemoFeedback || globalThis.freshFlowDemoFeedback.length === 0) {
+    globalThis.freshFlowDemoFeedback = getDefaultInitialFeedback();
   }
-  return getDefaultInitialFeedback();
+  return globalThis.freshFlowDemoFeedback;
 }
 
 async function writeDemoFeedback(items: FeedbackItem[]): Promise<void> {
-  let parsed: Record<string, unknown> = {};
-  try {
-    const raw = await readFile(demoDataPath, "utf-8");
-    parsed = JSON.parse(raw);
-  } catch {
-    try {
-      await mkdir(path.dirname(demoDataPath), { recursive: true });
-    } catch {
-      // Ignore
-    }
-  }
-
-  parsed.feedback = items;
-  try {
-    await writeFile(demoDataPath, JSON.stringify(parsed, null, 2), "utf-8");
-  } catch {
-    // Ignore write error on read-only serverless environment
-  }
+  globalThis.freshFlowDemoFeedback = items;
 }
 
 function mapRow(row: FeedbackRow): FeedbackItem {

@@ -256,52 +256,40 @@ function getDefaultInitialOrders(): Order[] {
   ];
 }
 
-async function ensureDemoDataFile(): Promise<DemoData> {
-  try {
-    const raw = await readFile(demoDataPath, "utf-8");
-    const parsed = JSON.parse(raw) as DemoData;
-    if (parsed && Array.isArray(parsed.orders) && parsed.orders.length > 0) {
-      return parsed;
-    }
-  } catch {
-    // Ignore read errors
-  }
+declare global {
+  var freshFlowDemoData: DemoData | undefined;
+}
 
-  const defaultOrders = getDefaultInitialOrders();
-  const defaultData: DemoData = {
-    orders: defaultOrders,
-    history: defaultOrders.map((o) => ({
-      id: o.id,
-      orderId: o.id,
-      oldStatus: null,
-      newStatus: o.status,
-      changedBy: "system",
-      changedAt: o.createdAt,
-      notes: "Initial demo order seeded.",
-    })),
-    notifications: [],
-  };
-
-  try {
-    await mkdir(path.dirname(demoDataPath), { recursive: true });
-    await writeFile(demoDataPath, JSON.stringify(defaultData, null, 2), "utf-8");
-  } catch {
-    // Ignore write errors on read-only serverless environments
+function getGlobalDemoData(): DemoData {
+  if (
+    !globalThis.freshFlowDemoData ||
+    !globalThis.freshFlowDemoData.orders ||
+    globalThis.freshFlowDemoData.orders.length === 0
+  ) {
+    const defaultOrders = getDefaultInitialOrders();
+    globalThis.freshFlowDemoData = {
+      orders: defaultOrders,
+      history: defaultOrders.map((o) => ({
+        id: o.id,
+        orderId: o.id,
+        oldStatus: null,
+        newStatus: o.status,
+        changedBy: "system",
+        changedAt: o.createdAt,
+        notes: "Initial demo order seeded.",
+      })),
+      notifications: [],
+    };
   }
-  return defaultData;
+  return globalThis.freshFlowDemoData;
 }
 
 async function readDemoData(): Promise<DemoData> {
-  return ensureDemoDataFile();
+  return getGlobalDemoData();
 }
 
 async function writeDemoData(data: DemoData): Promise<void> {
-  try {
-    await mkdir(path.dirname(demoDataPath), { recursive: true });
-    await writeFile(demoDataPath, JSON.stringify(data, null, 2), "utf-8");
-  } catch {
-    // Ignore write errors on read-only serverless environments
-  }
+  globalThis.freshFlowDemoData = data;
 }
 
 async function createDemoOrder(input: BookingInput, quote: Quote): Promise<Order> {
@@ -332,15 +320,15 @@ async function createDemoOrder(input: BookingInput, quote: Quote): Promise<Order
     updatedAt: now,
   };
 
-  data.orders.push(order);
-  data.history.push({
-    id: Math.max(0, ...data.history.map((h) => h.id)) + 1,
-    orderId: order.id,
+  data.orders.unshift(order);
+  data.history.unshift({
+    id: data.history.length + 1,
+    orderId: nextId,
     oldStatus: null,
     newStatus: "NEW",
-    changedBy: "system",
+    changedBy: "customer",
     changedAt: now,
-    notes: "Order created from website booking flow.",
+    notes: "Booking created via website.",
   });
 
   await writeDemoData(data);
