@@ -50,7 +50,6 @@ export const navigation = [
   { href: "/services", label: "Services" },
   { href: "/calculator", label: "Rate Calculator" },
   { href: "/how-it-works", label: "How It Works" },
-  { href: "/track", label: "Track Ticket" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
 ] as const;
