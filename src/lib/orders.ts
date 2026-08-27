@@ -380,19 +380,30 @@ export async function findOrderForTracking(params: {
   }
 
   if (params.phone) {
+    const queryDigits = params.phone.replace(/\D/g, "");
     const matchByPhone = data.orders
-      .filter((order) => order.customerPhone === params.phone)
+      .filter((order) => {
+        const orderDigits = order.customerPhone.replace(/\D/g, "");
+        if (order.customerPhone === params.phone || orderDigits === queryDigits) {
+          return true;
+        }
+        if (queryDigits.length >= 7 && orderDigits.endsWith(queryDigits.slice(-7))) {
+          return true;
+        }
+        return false;
+      })
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
     if (matchByPhone) return matchByPhone;
   }
 
   if (params.email && params.phone) {
+    const queryDigits = params.phone.replace(/\D/g, "");
     return (
       data.orders
         .filter(
           (order) =>
             order.customerEmail.toLowerCase() === params.email?.toLowerCase() &&
-            order.customerPhone === params.phone,
+            (order.customerPhone === params.phone || order.customerPhone.replace(/\D/g, "").endsWith(queryDigits.slice(-7))),
         )
         .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0] || null
     );

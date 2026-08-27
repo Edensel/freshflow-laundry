@@ -72,10 +72,27 @@ export function AdminTicketQueue({ orders }: AdminTicketQueueProps) {
       if (!searchQuery.trim()) return true;
 
       const q = searchQuery.toLowerCase().trim();
+      const qDigits = q.replace(/\D/g, "");
+
+      // Smart Kenyan Phone Search Normalization
+      let phoneMatch = false;
+      if (qDigits.length >= 3) {
+        const queryKenyaDigits = (qDigits.startsWith("07") || qDigits.startsWith("01"))
+          ? "254" + qDigits.slice(1)
+          : qDigits;
+
+        const orderPhoneDigits = order.customerPhone.replace(/\D/g, "");
+        phoneMatch =
+          orderPhoneDigits.includes(queryKenyaDigits) ||
+          order.customerPhone.toLowerCase().includes(q);
+      } else {
+        phoneMatch = order.customerPhone.toLowerCase().includes(q);
+      }
+
       return (
         order.ticketId.toLowerCase().includes(q) ||
         order.customerName.toLowerCase().includes(q) ||
-        order.customerPhone.toLowerCase().includes(q) ||
+        phoneMatch ||
         order.customerEmail.toLowerCase().includes(q) ||
         order.serviceArea.toLowerCase().includes(q) ||
         order.address.toLowerCase().includes(q)
