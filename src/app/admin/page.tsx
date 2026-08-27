@@ -2,9 +2,6 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { redirect } from "next/navigation";
 import {
-  CheckCircle2,
-  ChevronLeft,
-  ChevronRight,
   Lock,
   LogOut,
   Mail,
@@ -12,10 +9,9 @@ import {
   Package,
   ShieldCheck,
   Sparkles,
-  Star,
-  Trash2,
   TrendingUp,
 } from "lucide-react";
+import { AdminReviewModeration } from "@/components/AdminReviewModeration";
 import { AdminTicketQueue } from "@/components/AdminTicketQueue";
 import { FinancialAnalytics } from "@/components/FinancialAnalytics";
 import { WalkInOrderModal } from "@/components/WalkInOrderModal";
@@ -27,12 +23,7 @@ import {
 import { businessConfig } from "@/lib/business";
 import { listAllFeedback } from "@/lib/feedback";
 import { getPublicMetrics, listRecentOrders } from "@/lib/orders";
-import {
-  approveFeedbackAction,
-  deleteFeedbackAction,
-  loginAction,
-  logoutAction,
-} from "./actions";
+import { loginAction, logoutAction } from "./actions";
 
 export const metadata: Metadata = {
   title: "Senior Executive Operations Portal | Fresh Flow Nairobi",
@@ -43,18 +34,8 @@ type AdminPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
-const REVIEWS_PER_PAGE = 5;
-
 function first(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
-}
-
-function formatDate(value: string) {
-  return new Date(value).toLocaleString("en-KE", {
-    dateStyle: "medium",
-    timeStyle: "short",
-    timeZone: "Africa/Nairobi",
-  });
 }
 
 function LoginPanel({ error }: { error?: string }) {
@@ -145,7 +126,6 @@ function LoginPanel({ error }: { error?: string }) {
 export default async function AdminPage({ searchParams }: AdminPageProps) {
   const params = await searchParams;
   const activeTab = first(params.tab) || "tickets";
-  const reviewPageParam = Math.max(1, Number(first(params.reviewPage) || "1"));
 
   if (!isAdminConfigured()) {
     return (
@@ -174,14 +154,6 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
   ]);
 
   const pendingFeedbackCount = feedbackList.filter((f) => !f.approved).length;
-
-  // Reviews Pagination
-  const totalReviewPages = Math.ceil(feedbackList.length / REVIEWS_PER_PAGE) || 1;
-  const currentReviewPage = Math.min(reviewPageParam, totalReviewPages);
-  const paginatedReviews = feedbackList.slice(
-    (currentReviewPage - 1) * REVIEWS_PER_PAGE,
-    currentReviewPage * REVIEWS_PER_PAGE
-  );
 
   return (
     <main className="min-h-screen bg-[#f8fafc] py-8 lg:py-10 text-[#092341]">
@@ -273,138 +245,10 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
           </section>
         )}
 
-        {/* TAB 3: CUSTOMER REVIEW MODERATION */}
+        {/* TAB 3: INSTANT REAL-TIME SEARCH REVIEW MODERATION */}
         {activeTab === "reviews" && (
-          <section className="mt-6 rounded-3xl border border-[#cbd5e1] bg-white p-6 shadow-sm">
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#f1f5f9] pb-4">
-              <div className="flex items-center gap-2">
-                <MessageSquareCheck className="size-5 text-[#1363DF]" />
-                <h2 className="text-xl font-extrabold text-[#092341]">
-                  Customer Review Moderation ({feedbackList.length})
-                </h2>
-              </div>
-              {pendingFeedbackCount > 0 ? (
-                <span className="rounded-full bg-[#ffe823] px-3 py-1 text-xs font-extrabold text-[#092341]">
-                  {pendingFeedbackCount} Pending Approval
-                </span>
-              ) : (
-                <span className="rounded-full bg-[#f0fdf4] px-3 py-1 text-xs font-bold text-[#166534]">
-                  All Reviews Moderated
-                </span>
-              )}
-            </div>
-
-            <div className="mt-4 space-y-4">
-              {paginatedReviews.length > 0 ? (
-                paginatedReviews.map((f) => (
-                  <div
-                    key={f.id}
-                    className={`flex flex-wrap items-start justify-between gap-4 rounded-2xl border p-4 text-xs ${
-                      f.approved
-                        ? "border-[#e2e8f0] bg-[#f8fafc]"
-                        : "border-[#fef08a] bg-[#fefce8]"
-                    }`}
-                  >
-                    <div className="space-y-1 max-w-2xl">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="font-extrabold text-[#092341] text-sm">
-                          {f.customerName}
-                        </span>
-                        <span className="text-[#64748b]">({f.locationArea})</span>
-                        <div className="flex text-[#f59e0b]">
-                          {Array.from({ length: f.rating }).map((_, i) => (
-                            <Star key={i} className="size-3.5 fill-current" />
-                          ))}
-                        </div>
-                        <span className="rounded-md bg-[#1363DF]/10 px-2 py-0.5 font-bold text-[#1363DF]">
-                          {f.serviceType}
-                        </span>
-                        {f.approved ? (
-                          <span className="rounded-full bg-[#f0fdf4] px-2 py-0.5 font-bold text-[#166534]">
-                            ✓ Published on Homepage
-                          </span>
-                        ) : (
-                          <span className="rounded-full bg-[#ffe823] px-2 py-0.5 font-extrabold text-[#092341]">
-                            ⏳ Pending Approval
-                          </span>
-                        )}
-                      </div>
-
-                      <p className="mt-2 text-sm italic text-[#334155]">
-                        &quot;{f.reviewText}&quot;
-                      </p>
-                      <p className="text-[10px] text-[#94a3b8]">Submitted: {formatDate(f.createdAt)}</p>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      {!f.approved && (
-                        <form action={approveFeedbackAction}>
-                          <input type="hidden" name="feedbackId" value={f.id} />
-                          <button
-                            type="submit"
-                            className="inline-flex items-center gap-1.5 rounded-xl bg-[#16a34a] px-3.5 py-2 font-bold text-white transition hover:bg-[#15803d]"
-                          >
-                            <CheckCircle2 className="size-3.5" />
-                            <span>Approve & Publish</span>
-                          </button>
-                        </form>
-                      )}
-
-                      <form action={deleteFeedbackAction}>
-                        <input type="hidden" name="feedbackId" value={f.id} />
-                        <button
-                          type="submit"
-                          className="inline-flex items-center gap-1.5 rounded-xl border border-[#cbd5e1] bg-white px-3 py-2 font-bold text-[#991b1b] transition hover:bg-[#fef2f2] hover:border-[#fecaca]"
-                        >
-                          <Trash2 className="size-3.5" />
-                          <span>Delete</span>
-                        </button>
-                      </form>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="py-4 text-center text-xs text-[#64748b]">
-                  No customer reviews submitted yet.
-                </p>
-              )}
-
-              {/* Minimal Scroll Review Pagination Controls */}
-              {totalReviewPages > 1 && (
-                <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#cbd5e1] bg-[#f8fafc] p-4 text-xs font-bold text-[#092341]">
-                  <span>
-                    Showing {((currentReviewPage - 1) * REVIEWS_PER_PAGE) + 1}–
-                    {Math.min(currentReviewPage * REVIEWS_PER_PAGE, feedbackList.length)} of {feedbackList.length} reviews
-                  </span>
-
-                  <div className="flex items-center gap-2">
-                    <a
-                      href={`/admin?tab=reviews&reviewPage=${currentReviewPage - 1}`}
-                      aria-disabled={currentReviewPage === 1}
-                      className={`inline-flex items-center gap-1 rounded-xl border border-[#cbd5e1] bg-white px-3.5 py-1.5 transition ${
-                        currentReviewPage === 1 ? "opacity-30 pointer-events-none" : "hover:border-[#1363DF]"
-                      }`}
-                    >
-                      <ChevronLeft className="size-4" />
-                      <span>Previous</span>
-                    </a>
-
-                    <span className="px-2">Page {currentReviewPage} of {totalReviewPages}</span>
-
-                    <a
-                      href={`/admin?tab=reviews&reviewPage=${currentReviewPage + 1}`}
-                      aria-disabled={currentReviewPage === totalReviewPages}
-                      className={`inline-flex items-center gap-1 rounded-xl border border-[#cbd5e1] bg-white px-3.5 py-1.5 transition ${
-                        currentReviewPage === totalReviewPages ? "opacity-30 pointer-events-none" : "hover:border-[#1363DF]"
-                      }`}
-                    >
-                      <span>Next</span>
-                      <ChevronRight className="size-4" />
-                    </a>
-                  </div>
-                </div>
-              )}
-            </div>
+          <section className="mt-6">
+            <AdminReviewModeration feedbackList={feedbackList} />
           </section>
         )}
       </div>
