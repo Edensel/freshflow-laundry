@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Footer } from "@/components/Footer";
-import { SiteHeader } from "@/components/SiteHeader";
+import { AppShell } from "@/components/AppShell";
 import { businessConfig } from "@/lib/business";
 import "./globals.css";
 
@@ -96,9 +95,7 @@ export default function RootLayout({
         className="min-h-full bg-[#f7f9fc] text-[#092341]"
         suppressHydrationWarning
       >
-        <SiteHeader />
-        {children}
-        <Footer />
+        <AppShell>{children}</AppShell>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
