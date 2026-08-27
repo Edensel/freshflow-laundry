@@ -5,6 +5,7 @@ import {
   AlertCircle,
   ArrowUpRight,
   Award,
+  Calendar,
   CheckCircle2,
   Clock,
   CreditCard,
@@ -44,19 +45,28 @@ export function FinancialAnalytics({ orders }: FinancialAnalyticsProps) {
   const [timeframe, setTimeframe] = useState<Timeframe>("monthly");
   const [ledgerFilter, setLedgerFilter] = useState<LedgerFilter>("all");
   const [selectedServiceFilter, setSelectedServiceFilter] = useState<string>("all");
+  const [specificDateFilter, setSpecificDateFilter] = useState<string>("");
 
   const now = new Date();
 
-  // Filter orders by selected timeframe AND selected service
+  // Filter orders by selected timeframe, specific calendar date, AND selected service
   const filteredOrders = useMemo(() => {
     return orders.filter((o) => {
       const created = new Date(o.createdAt);
-      const diffDays = (now.getTime() - created.getTime()) / (1000 * 3600 * 24);
+      const createdDateIso = created.toLocaleDateString("en-CA", {
+        timeZone: "Africa/Nairobi",
+      });
 
-      if (timeframe === "weekly" && diffDays > 7) return false;
-      if (timeframe === "monthly" && diffDays > 30) return false;
-      if (timeframe === "quarterly" && diffDays > 90) return false;
-      if (timeframe === "yearly" && diffDays > 365) return false;
+      // Specific calendar day filter takes precedence if set
+      if (specificDateFilter) {
+        if (createdDateIso !== specificDateFilter) return false;
+      } else {
+        const diffDays = (now.getTime() - created.getTime()) / (1000 * 3600 * 24);
+        if (timeframe === "weekly" && diffDays > 7) return false;
+        if (timeframe === "monthly" && diffDays > 30) return false;
+        if (timeframe === "quarterly" && diffDays > 90) return false;
+        if (timeframe === "yearly" && diffDays > 365) return false;
+      }
 
       // Filter by specific service item if selected
       if (selectedServiceFilter !== "all") {
@@ -68,7 +78,7 @@ export function FinancialAnalytics({ orders }: FinancialAnalyticsProps) {
 
       return true;
     });
-  }, [orders, timeframe, selectedServiceFilter]);
+  }, [orders, timeframe, specificDateFilter, selectedServiceFilter]);
 
   // Strict Realized vs Unpaid Financial Calculations
   const metrics = useMemo(() => {
@@ -204,35 +214,55 @@ export function FinancialAnalytics({ orders }: FinancialAnalyticsProps) {
           </div>
         </div>
 
-        {/* Service Item Filter Selector Bar */}
-        <div className="mt-5 flex flex-wrap items-center gap-3 rounded-2xl bg-[#F0F7FF] p-3.5 border border-[#bfdbfe]">
-          <div className="flex items-center gap-2 text-xs font-extrabold text-[#092341]">
-            <Tag className="size-4 text-[#1363DF]" />
-            <span>Filter Dashboard by Service:</span>
+        {/* Calendar Day Picker & Service Item Filter Selector Bar */}
+        <div className="mt-5 grid gap-3 sm:grid-cols-2 rounded-2xl bg-[#F0F7FF] p-3.5 border border-[#bfdbfe]">
+          {/* Specific Calendar Day Picker */}
+          <div className="flex items-center gap-2">
+            <Calendar className="size-4 shrink-0 text-[#1363DF]" />
+            <span className="text-xs font-extrabold text-[#092341] shrink-0">Calendar Day:</span>
+            <input
+              type="date"
+              value={specificDateFilter}
+              onChange={(e) => setSpecificDateFilter(e.target.value)}
+              className="flex-1 rounded-xl border border-[#cbd5e1] bg-white px-3 py-1.5 text-xs font-bold text-[#092341] outline-none focus:border-[#1363DF]"
+            />
+            {specificDateFilter && (
+              <button
+                type="button"
+                onClick={() => setSpecificDateFilter("")}
+                className="rounded-xl bg-[#092341] px-2.5 py-1 text-[11px] font-bold text-white hover:bg-[#1363DF]"
+              >
+                Clear Date ✕
+              </button>
+            )}
           </div>
 
-          <select
-            value={selectedServiceFilter}
-            onChange={(e) => setSelectedServiceFilter(e.target.value)}
-            className="flex-1 min-w-[220px] rounded-xl border border-[#cbd5e1] bg-white px-3.5 py-2 text-xs font-bold text-[#092341] outline-none focus:border-[#1363DF]"
-          >
-            <option value="all">🌟 All Services Combined</option>
-            {serviceCatalog.map((s) => (
-              <option key={s.id} value={s.id}>
-                [{s.categoryName}] {s.name} — ({formatKes(s.priceKe)}/{s.unit})
-              </option>
-            ))}
-          </select>
-
-          {selectedServiceFilter !== "all" && (
-            <button
-              type="button"
-              onClick={() => setSelectedServiceFilter("all")}
-              className="rounded-xl bg-[#092341] px-3 py-1.5 text-xs font-bold text-white hover:bg-[#1363DF]"
+          {/* Service Filter Dropdown */}
+          <div className="flex items-center gap-2">
+            <Tag className="size-4 shrink-0 text-[#1363DF]" />
+            <span className="text-xs font-extrabold text-[#092341] shrink-0">Service Filter:</span>
+            <select
+              value={selectedServiceFilter}
+              onChange={(e) => setSelectedServiceFilter(e.target.value)}
+              className="flex-1 rounded-xl border border-[#cbd5e1] bg-white px-3 py-1.5 text-xs font-bold text-[#092341] outline-none focus:border-[#1363DF]"
             >
-              Reset Service Filter ✕
-            </button>
-          )}
+              <option value="all">🌟 All Services Combined</option>
+              {serviceCatalog.map((s) => (
+                <option key={s.id} value={s.id}>
+                  [{s.categoryName}] {s.name} — ({formatKes(s.priceKe)}/{s.unit})
+                </option>
+              ))}
+            </select>
+            {selectedServiceFilter !== "all" && (
+              <button
+                type="button"
+                onClick={() => setSelectedServiceFilter("all")}
+                className="rounded-xl bg-[#092341] px-2.5 py-1 text-[11px] font-bold text-white hover:bg-[#1363DF]"
+              >
+                Clear Service ✕
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Primary Realized vs Unpaid Financial KPI Grid */}

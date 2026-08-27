@@ -49,6 +49,7 @@ function formatDateShort(value: string) {
 
 export function ExecutiveReportingModule({ orders }: ExecutiveReportingModuleProps) {
   const [dateFilter, setDateFilter] = useState<DateFilter>("30days");
+  const [specificDateFilter, setSpecificDateFilter] = useState<string>("");
   const [channelFilter, setChannelFilter] = useState<ChannelFilter>("all");
   const [paymentFilter, setPaymentFilter] = useState<PaymentFilter>("all");
   const [areaFilter, setAreaFilter] = useState<string>("all");
@@ -69,13 +70,20 @@ export function ExecutiveReportingModule({ orders }: ExecutiveReportingModulePro
   const filteredOrders = useMemo(() => {
     return orders.filter((o) => {
       const created = new Date(o.createdAt);
-      const diffDays = (now.getTime() - created.getTime()) / (1000 * 3600 * 24);
+      const createdDateIso = created.toLocaleDateString("en-CA", {
+        timeZone: "Africa/Nairobi",
+      });
 
-      // Date range filter
-      if (dateFilter === "today" && diffDays > 1) return false;
-      if (dateFilter === "7days" && diffDays > 7) return false;
-      if (dateFilter === "30days" && diffDays > 30) return false;
-      if (dateFilter === "ytd" && created.getFullYear() !== now.getFullYear()) return false;
+      // Specific calendar date filter
+      if (specificDateFilter) {
+        if (createdDateIso !== specificDateFilter) return false;
+      } else {
+        const diffDays = (now.getTime() - created.getTime()) / (1000 * 3600 * 24);
+        if (dateFilter === "today" && diffDays > 1) return false;
+        if (dateFilter === "7days" && diffDays > 7) return false;
+        if (dateFilter === "30days" && diffDays > 30) return false;
+        if (dateFilter === "ytd" && created.getFullYear() !== now.getFullYear()) return false;
+      }
 
       // Channel filter
       const isWalkIn =
@@ -102,7 +110,7 @@ export function ExecutiveReportingModule({ orders }: ExecutiveReportingModulePro
 
       return true;
     });
-  }, [orders, dateFilter, channelFilter, paymentFilter, areaFilter, serviceFilter]);
+  }, [orders, dateFilter, specificDateFilter, channelFilter, paymentFilter, areaFilter, serviceFilter]);
 
   // Service Revenue Leaderboard Calculation
   const serviceLeaderboard = useMemo(() => {
@@ -270,7 +278,20 @@ export function ExecutiveReportingModule({ orders }: ExecutiveReportingModulePro
         </div>
 
         {/* Multi-Dimensional Filter Controls */}
-        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5 rounded-2xl border border-[#e2e8f0] bg-[#f8fafc] p-4">
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-6 rounded-2xl border border-[#e2e8f0] bg-[#f8fafc] p-4">
+          {/* Specific Calendar Day Picker */}
+          <div>
+            <label className="block text-[11px] font-extrabold uppercase text-[#1363DF]">
+              Calendar Day
+            </label>
+            <input
+              type="date"
+              value={specificDateFilter}
+              onChange={(e) => setSpecificDateFilter(e.target.value)}
+              className="mt-1.5 min-h-10 w-full rounded-xl border border-[#cbd5e1] bg-white px-3 text-xs font-bold text-[#092341] outline-none focus:border-[#1363DF]"
+            />
+          </div>
+
           {/* Time Period Filter */}
           <div>
             <label className="block text-[11px] font-extrabold uppercase text-[#64748b]">
@@ -278,7 +299,10 @@ export function ExecutiveReportingModule({ orders }: ExecutiveReportingModulePro
             </label>
             <select
               value={dateFilter}
-              onChange={(e) => setDateFilter(e.target.value as DateFilter)}
+              onChange={(e) => {
+                setDateFilter(e.target.value as DateFilter);
+                setSpecificDateFilter("");
+              }}
               className="mt-1.5 min-h-10 w-full rounded-xl border border-[#cbd5e1] bg-white px-3 text-xs font-bold text-[#092341] outline-none focus:border-[#1363DF]"
             >
               <option value="today">Today Only</option>
