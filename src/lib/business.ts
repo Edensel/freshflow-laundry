@@ -47,9 +47,9 @@ export const serviceAreas = [
 
 export const navigation = [
   { href: "/", label: "Home" },
-  { href: "/services", label: "Services & Pricing" },
-  { href: "/how-it-works", label: "How It Works" },
+  { href: "/services", label: "Services" },
   { href: "/calculator", label: "Rate Calculator" },
+  { href: "/how-it-works", label: "How It Works" },
   { href: "/track", label: "Track Ticket" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
