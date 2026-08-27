@@ -49,7 +49,8 @@ export const navigation = [
   { href: "/", label: "Home" },
   { href: "/services", label: "Services & Pricing" },
   { href: "/how-it-works", label: "How It Works" },
-  { href: "/track", label: "Track" },
+  { href: "/calculator", label: "Rate Calculator" },
+  { href: "/track", label: "Track Ticket" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
 ] as const;
