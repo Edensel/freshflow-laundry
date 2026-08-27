@@ -222,55 +222,82 @@ export default async function Home() {
       <section id="estimator" className="bg-[#f8fafc] py-16 lg:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-12 lg:grid-cols-12 lg:items-start">
-            {/* Left Col: Services List */}
-            <div className="lg:col-span-5">
-              <span className="text-xs font-bold uppercase tracking-wider text-[#1363DF]">
-                Transparent Rates
-              </span>
-              <h2 className="mt-2 text-3xl font-black text-[#092341] sm:text-4xl">
-                Custom Care For Every Item
-              </h2>
-              <p className="mt-4 text-base leading-relaxed text-[#64748b]">
-                Calculate your exact laundry cost in real-time. No hidden surcharges or surprise weight fees.
-              </p>
+            {/* Left Col: Rate Guarantees & Commercial Card */}
+            <div className="lg:col-span-5 flex flex-col justify-between h-full space-y-6">
+              <div>
+                <div className="inline-flex items-center gap-2 rounded-full bg-[#1363DF]/10 px-3.5 py-1 text-xs font-extrabold uppercase tracking-wider text-[#1363DF]">
+                  <Sparkles className="size-4" />
+                  <span>Guaranteed Rates</span>
+                </div>
+                <h2 className="mt-3 text-3xl font-black text-[#092341] sm:text-4xl leading-tight">
+                  Transparent Pricing, Zero Hidden Surcharges
+                </h2>
+                <p className="mt-3 text-sm leading-relaxed text-[#64748b]">
+                  Calculate your exact service quote in real-time. Transparent per-kg, per-item, and flat room rates across Nairobi.
+                </p>
 
-              <div className="mt-8 space-y-4">
-                {serviceCatalog.map((service) => (
-                  <div
-                    key={service.id}
-                    className="flex items-start gap-4 rounded-2xl border border-[#e2e8f0] bg-white p-4 shadow-xs"
-                  >
-                    <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#F0F7FF] text-[#1363DF]">
-                      <CheckCircle2 className="size-5" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        <h4 className="font-bold text-[#092341]">{service.name}</h4>
-                        <span className="rounded-lg bg-[#1363DF]/10 px-2.5 py-0.5 text-xs font-bold text-[#1363DF]">
-                          {service.id === "corporate"
-                            ? "Custom Quote"
-                            : `${formatKes(service.priceKe)}/${service.unit}`}
-                        </span>
+                {/* Compact Rate Guarantees List */}
+                <div className="mt-6 space-y-3">
+                  {[
+                    {
+                      title: "Standardized KSh & USD Rates",
+                      desc: "Fixed pricing with clear minimum order thresholds.",
+                      icon: ShieldCheck,
+                    },
+                    {
+                      title: "Free Doorstep Route over KSh 2,500",
+                      desc: "Zero delivery fees on orders meeting minimum threshold.",
+                      icon: Truck,
+                    },
+                    {
+                      title: "Digital Ticket & Receipt",
+                      desc: "Instant M-Pesa receipt sent to your email.",
+                      icon: CheckCircle2,
+                    },
+                  ].map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <div
+                        key={item.title}
+                        className="flex items-start gap-3 rounded-2xl border border-[#e2e8f0] bg-white p-3.5 shadow-xs transition hover:border-[#cbd5e1]"
+                      >
+                        <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-[#F0F7FF] text-[#1363DF]">
+                          <Icon className="size-4" />
+                        </div>
+                        <div>
+                          <h4 className="text-xs font-extrabold text-[#092341]">{item.title}</h4>
+                          <p className="mt-0.5 text-[11px] text-[#64748b]">{item.desc}</p>
+                        </div>
                       </div>
-                      <p className="mt-1 text-xs text-[#64748b]">{service.description}</p>
-                    </div>
-                  </div>
-                ))}
+                    );
+                  })}
+                </div>
+
+                <div className="mt-6">
+                  <Link
+                    href="/services"
+                    className="inline-flex items-center gap-2 text-xs font-extrabold text-[#1363DF] hover:underline"
+                  >
+                    <span>View Complete 18-Service Price List</span>
+                    <ArrowRight className="size-4" />
+                  </Link>
+                </div>
               </div>
 
-              <div className="mt-8 rounded-3xl bg-[#092341] p-6 text-white shadow-xl">
+              {/* B2B Commercial Banner */}
+              <div className="rounded-3xl bg-[#092341] p-6 text-white shadow-xl">
                 <div className="flex items-center gap-3">
                   <Building2 className="size-6 text-[#38BDF8]" />
-                  <h4 className="font-bold text-lg">Commercial & B2B Contracts</h4>
+                  <h4 className="font-extrabold text-base">Commercial & Embassy Contracts</h4>
                 </div>
                 <p className="mt-2 text-xs text-white/80 leading-relaxed">
-                  We handle weekly linen, towel, and uniform contracts for Nairobi hotels, gyms, spas, clinics, and offices.
+                  Weekly linen, towel, uniform dry cleaning, and facility pest control for Nairobi hotels, offices, spas & embassies.
                 </p>
                 <Link
                   href="/contact"
                   className="mt-4 inline-flex items-center gap-2 text-xs font-bold text-[#ffe823] hover:underline"
                 >
-                  <span>Request Commercial Rate Card</span>
+                  <span>Request Corporate Rate Card</span>
                   <ArrowRight className="size-3.5" />
                 </Link>
               </div>
