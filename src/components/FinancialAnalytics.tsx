@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import {
   AlertCircle,
   ArrowUpRight,
+  Award,
   CheckCircle2,
   Clock,
   CreditCard,
@@ -12,12 +13,16 @@ import {
   Globe,
   PieChart,
   Receipt,
+  Sparkles,
   Store,
+  Tag,
+  Trophy,
   TrendingUp,
   Wallet,
 } from "lucide-react";
 import { updatePaymentStatusAction } from "@/app/admin/actions";
 import { formatKes, paymentOptions } from "@/lib/business";
+import { serviceCatalog } from "@/lib/pricing";
 import type { Order } from "@/lib/orders";
 
 type FinancialAnalyticsProps = {
@@ -38,22 +43,32 @@ function formatDate(value: string) {
 export function FinancialAnalytics({ orders }: FinancialAnalyticsProps) {
   const [timeframe, setTimeframe] = useState<Timeframe>("monthly");
   const [ledgerFilter, setLedgerFilter] = useState<LedgerFilter>("all");
+  const [selectedServiceFilter, setSelectedServiceFilter] = useState<string>("all");
 
   const now = new Date();
 
-  // Filter orders by selected timeframe
+  // Filter orders by selected timeframe AND selected service
   const filteredOrders = useMemo(() => {
     return orders.filter((o) => {
       const created = new Date(o.createdAt);
       const diffDays = (now.getTime() - created.getTime()) / (1000 * 3600 * 24);
 
-      if (timeframe === "weekly") return diffDays <= 7;
-      if (timeframe === "monthly") return diffDays <= 30;
-      if (timeframe === "quarterly") return diffDays <= 90;
-      if (timeframe === "yearly") return diffDays <= 365;
+      if (timeframe === "weekly" && diffDays > 7) return false;
+      if (timeframe === "monthly" && diffDays > 30) return false;
+      if (timeframe === "quarterly" && diffDays > 90) return false;
+      if (timeframe === "yearly" && diffDays > 365) return false;
+
+      // Filter by specific service item if selected
+      if (selectedServiceFilter !== "all") {
+        const hasService = o.serviceDetails.lines.some(
+          (l) => l.id === selectedServiceFilter || l.name === selectedServiceFilter
+        );
+        if (!hasService) return false;
+      }
+
       return true;
     });
-  }, [orders, timeframe]);
+  }, [orders, timeframe, selectedServiceFilter]);
 
   // Strict Realized vs Unpaid Financial Calculations
   const metrics = useMemo(() => {
@@ -107,6 +122,40 @@ export function FinancialAnalytics({ orders }: FinancialAnalyticsProps) {
     };
   }, [filteredOrders]);
 
+  // Service Revenue Leaderboard (Ranked by Total Revenue Generated)
+  const serviceLeaderboard = useMemo(() => {
+    const map = new Map<
+      string,
+      { name: string; category: string; unit: string; revenue: number; unitsSold: number; ticketCount: number }
+    >();
+
+    for (const order of filteredOrders) {
+      for (const line of order.serviceDetails.lines) {
+        const existing = map.get(line.name) || {
+          name: line.name,
+          category: line.category || "laundry",
+          unit: line.unit,
+          revenue: 0,
+          unitsSold: 0,
+          ticketCount: 0,
+        };
+
+        existing.revenue += line.lineTotalKe;
+        existing.unitsSold += line.quantity;
+        existing.ticketCount += 1;
+        map.set(line.name, existing);
+      }
+    }
+
+    const list = Array.from(map.values()).sort((a, b) => b.revenue - a.revenue);
+    const totalRev = list.reduce((sum, item) => sum + item.revenue, 0);
+
+    return list.map((item) => ({
+      ...item,
+      percentage: totalRev > 0 ? Math.round((item.revenue / totalRev) * 100) : 0,
+    }));
+  }, [filteredOrders]);
+
   // Filtered Ledger List for Table Display
   const ledgerOrders = useMemo(() => {
     if (ledgerFilter === "paid") {
@@ -126,13 +175,13 @@ export function FinancialAnalytics({ orders }: FinancialAnalyticsProps) {
           <div>
             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#1363DF]">
               <TrendingUp className="size-4" />
-              <span>Real-Time Cash Accounting & Intelligence Engine</span>
+              <span>Real-Time Cash Accounting & Service Revenue Engine</span>
             </div>
             <h2 className="mt-1 text-2xl font-black text-[#092341]">
-              Executive Financial Realization Dashboard
+              Executive Financial & Service Realization Dashboard
             </h2>
             <p className="mt-0.5 text-xs text-[#64748b]">
-              Strict segregation of realized paid cash revenue vs pending accounts receivable.
+              Real-time analysis of highest revenue-generating services, cash realization, and receivables.
             </p>
           </div>
 
@@ -153,6 +202,37 @@ export function FinancialAnalytics({ orders }: FinancialAnalyticsProps) {
               </button>
             ))}
           </div>
+        </div>
+
+        {/* Service Item Filter Selector Bar */}
+        <div className="mt-5 flex flex-wrap items-center gap-3 rounded-2xl bg-[#F0F7FF] p-3.5 border border-[#bfdbfe]">
+          <div className="flex items-center gap-2 text-xs font-extrabold text-[#092341]">
+            <Tag className="size-4 text-[#1363DF]" />
+            <span>Filter Dashboard by Service:</span>
+          </div>
+
+          <select
+            value={selectedServiceFilter}
+            onChange={(e) => setSelectedServiceFilter(e.target.value)}
+            className="flex-1 min-w-[220px] rounded-xl border border-[#cbd5e1] bg-white px-3.5 py-2 text-xs font-bold text-[#092341] outline-none focus:border-[#1363DF]"
+          >
+            <option value="all">🌟 All Services Combined</option>
+            {serviceCatalog.map((s) => (
+              <option key={s.id} value={s.id}>
+                [{s.categoryName}] {s.name} — ({formatKes(s.priceKe)}/{s.unit})
+              </option>
+            ))}
+          </select>
+
+          {selectedServiceFilter !== "all" && (
+            <button
+              type="button"
+              onClick={() => setSelectedServiceFilter("all")}
+              className="rounded-xl bg-[#092341] px-3 py-1.5 text-xs font-bold text-white hover:bg-[#1363DF]"
+            >
+              Reset Service Filter ✕
+            </button>
+          )}
         </div>
 
         {/* Primary Realized vs Unpaid Financial KPI Grid */}
@@ -225,6 +305,86 @@ export function FinancialAnalytics({ orders }: FinancialAnalyticsProps) {
                 style={{ width: `${metrics.realizationRate}%` }}
               />
             </div>
+          </div>
+        </div>
+
+        {/* Highest Revenue-Generating Services Leaderboard */}
+        <div className="mt-8 border-t border-[#f1f5f9] pt-6">
+          <div className="flex items-center justify-between gap-2 mb-4">
+            <div>
+              <div className="flex items-center gap-1.5 text-xs font-black uppercase text-[#1363DF]">
+                <Trophy className="size-4 text-[#d97706]" />
+                <span>Service Revenue Contribution Leaderboard</span>
+              </div>
+              <h3 className="text-xl font-black text-[#092341]">
+                Top Revenue Generating Services
+              </h3>
+              <p className="text-xs text-[#64748b]">
+                Ranked by total revenue contribution generated across all customer tickets.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {serviceLeaderboard.length === 0 ? (
+              <div className="col-span-full rounded-2xl bg-[#f8fafc] p-6 text-center text-xs text-[#94a3b8]">
+                No service line items found for the active filter.
+              </div>
+            ) : (
+              serviceLeaderboard.map((item, index) => {
+                const isTop1 = index === 0;
+
+                return (
+                  <div
+                    key={item.name}
+                    className={`rounded-2xl border p-4 shadow-xs transition ${
+                      isTop1
+                        ? "border-[#ffe823] bg-[#fffdf0] ring-2 ring-[#ffe823]/40"
+                        : "border-[#e2e8f0] bg-white hover:bg-[#f8fafc]"
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        {isTop1 && (
+                          <span className="mb-1 inline-flex items-center gap-1 rounded-full bg-[#ffe823] px-2 py-0.5 text-[9px] font-black text-[#092341]">
+                            <Trophy className="size-3 text-[#d97706]" />
+                            #1 Top Revenue Generator
+                          </span>
+                        )}
+                        <h4 className="font-extrabold text-[#092341] text-xs">
+                          {item.name}
+                        </h4>
+                        <span className="text-[10px] text-[#64748b] uppercase">
+                          {item.category} • {item.ticketCount} orders
+                        </span>
+                      </div>
+
+                      <span className="rounded-full bg-[#F0F7FF] px-2.5 py-1 text-xs font-black text-[#1363DF]">
+                        {item.percentage}%
+                      </span>
+                    </div>
+
+                    <div className="mt-3 flex items-baseline justify-between">
+                      <p className="text-xl font-black text-[#092341]">
+                        {formatKes(item.revenue)}
+                      </p>
+                      <span className="text-xs font-bold text-[#64748b]">
+                        {item.unitsSold} {item.unit}s sold
+                      </span>
+                    </div>
+
+                    <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-[#e2e8f0]">
+                      <div
+                        className={`h-full transition-all duration-500 ${
+                          isTop1 ? "bg-[#d97706]" : "bg-[#1363DF]"
+                        }`}
+                        style={{ width: `${item.percentage}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
 

@@ -16,9 +16,12 @@ import {
   Search,
   Sparkles,
   Store,
+  Tag,
+  Trophy,
   TrendingUp,
 } from "lucide-react";
 import { formatKes, paymentOptions } from "@/lib/business";
+import { serviceCatalog } from "@/lib/pricing";
 import type { Order } from "@/lib/orders";
 
 type ExecutiveReportingModuleProps = {
@@ -49,6 +52,7 @@ export function ExecutiveReportingModule({ orders }: ExecutiveReportingModulePro
   const [channelFilter, setChannelFilter] = useState<ChannelFilter>("all");
   const [paymentFilter, setPaymentFilter] = useState<PaymentFilter>("all");
   const [areaFilter, setAreaFilter] = useState<string>("all");
+  const [serviceFilter, setServiceFilter] = useState<string>("all");
 
   const now = new Date();
 
@@ -88,9 +92,51 @@ export function ExecutiveReportingModule({ orders }: ExecutiveReportingModulePro
       // Neighborhood area filter
       if (areaFilter !== "all" && o.serviceArea !== areaFilter) return false;
 
+      // Service item filter
+      if (serviceFilter !== "all") {
+        const hasService = o.serviceDetails.lines.some(
+          (l) => l.id === serviceFilter || l.name === serviceFilter
+        );
+        if (!hasService) return false;
+      }
+
       return true;
     });
-  }, [orders, dateFilter, channelFilter, paymentFilter, areaFilter]);
+  }, [orders, dateFilter, channelFilter, paymentFilter, areaFilter, serviceFilter]);
+
+  // Service Revenue Leaderboard Calculation
+  const serviceLeaderboard = useMemo(() => {
+    const map = new Map<
+      string,
+      { name: string; category: string; unit: string; revenue: number; unitsSold: number; ticketCount: number }
+    >();
+
+    for (const order of filteredOrders) {
+      for (const line of order.serviceDetails.lines) {
+        const existing = map.get(line.name) || {
+          name: line.name,
+          category: line.category || "laundry",
+          unit: line.unit,
+          revenue: 0,
+          unitsSold: 0,
+          ticketCount: 0,
+        };
+
+        existing.revenue += line.lineTotalKe;
+        existing.unitsSold += line.quantity;
+        existing.ticketCount += 1;
+        map.set(line.name, existing);
+      }
+    }
+
+    const list = Array.from(map.values()).sort((a, b) => b.revenue - a.revenue);
+    const totalRev = list.reduce((sum, item) => sum + item.revenue, 0);
+
+    return list.map((item) => ({
+      ...item,
+      percentage: totalRev > 0 ? Math.round((item.revenue / totalRev) * 100) : 0,
+    }));
+  }, [filteredOrders]);
 
   // Report Summary Metrics
   const summary = useMemo(() => {
@@ -224,11 +270,11 @@ export function ExecutiveReportingModule({ orders }: ExecutiveReportingModulePro
         </div>
 
         {/* Multi-Dimensional Filter Controls */}
-        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 rounded-2xl border border-[#e2e8f0] bg-[#f8fafc] p-4">
-          {/* Date Filter */}
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-5 rounded-2xl border border-[#e2e8f0] bg-[#f8fafc] p-4">
+          {/* Time Period Filter */}
           <div>
             <label className="block text-[11px] font-extrabold uppercase text-[#64748b]">
-              Time Period Window
+              Time Window
             </label>
             <select
               value={dateFilter}
@@ -243,7 +289,26 @@ export function ExecutiveReportingModule({ orders }: ExecutiveReportingModulePro
             </select>
           </div>
 
-          {/* Channel Filter */}
+          {/* Service Filter */}
+          <div>
+            <label className="block text-[11px] font-extrabold uppercase text-[#64748b]">
+              Garment / Service
+            </label>
+            <select
+              value={serviceFilter}
+              onChange={(e) => setServiceFilter(e.target.value)}
+              className="mt-1.5 min-h-10 w-full rounded-xl border border-[#cbd5e1] bg-white px-3 text-xs font-bold text-[#092341] outline-none focus:border-[#1363DF]"
+            >
+              <option value="all">🌟 All Services</option>
+              {serviceCatalog.map((s) => (
+                <option key={s.id} value={s.id}>
+                  [{s.categoryName}] {s.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Sales Channel Filter */}
           <div>
             <label className="block text-[11px] font-extrabold uppercase text-[#64748b]">
               Sales Channel
@@ -253,16 +318,16 @@ export function ExecutiveReportingModule({ orders }: ExecutiveReportingModulePro
               onChange={(e) => setChannelFilter(e.target.value as ChannelFilter)}
               className="mt-1.5 min-h-10 w-full rounded-xl border border-[#cbd5e1] bg-white px-3 text-xs font-bold text-[#092341] outline-none focus:border-[#1363DF]"
             >
-              <option value="all">All Channels (Walk-In + Online)</option>
+              <option value="all">All Channels</option>
               <option value="walkin">Store Walk-In Counter POS</option>
-              <option value="online">Direct Website Online Bookings</option>
+              <option value="online">Direct Website Online</option>
             </select>
           </div>
 
-          {/* Payment Status Filter */}
+          {/* Payment Realization Filter */}
           <div>
             <label className="block text-[11px] font-extrabold uppercase text-[#64748b]">
-              Payment Realization
+              Payment Status
             </label>
             <select
               value={paymentFilter}
@@ -270,15 +335,15 @@ export function ExecutiveReportingModule({ orders }: ExecutiveReportingModulePro
               className="mt-1.5 min-h-10 w-full rounded-xl border border-[#cbd5e1] bg-white px-3 text-xs font-bold text-[#092341] outline-none focus:border-[#1363DF]"
             >
               <option value="all">All (Paid + Unpaid)</option>
-              <option value="paid">🟢 Realized Cash Paid Only</option>
-              <option value="unpaid">⏳ Outstanding Unpaid Only</option>
+              <option value="paid">🟢 Paid Only</option>
+              <option value="unpaid">⏳ Unpaid Only</option>
             </select>
           </div>
 
           {/* Service Area Filter */}
           <div>
             <label className="block text-[11px] font-extrabold uppercase text-[#64748b]">
-              Service Neighborhood
+              Neighborhood
             </label>
             <select
               value={areaFilter}
@@ -343,6 +408,63 @@ export function ExecutiveReportingModule({ orders }: ExecutiveReportingModulePro
             <p className="mt-1 text-[11px] text-[#64748b]">
               Realization rate: {summary.realizationPct}%
             </p>
+          </div>
+        </div>
+
+        {/* Highest Revenue Generating Services Table */}
+        <div className="mt-8 border-t border-[#f1f5f9] pt-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Trophy className="size-4 text-[#d97706]" />
+            <h3 className="text-sm font-extrabold text-[#092341] uppercase tracking-wider">
+              Top Revenue Generating Services Leaderboard
+            </h3>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {serviceLeaderboard.slice(0, 6).map((item, index) => {
+              const isTop1 = index === 0;
+
+              return (
+                <div
+                  key={item.name}
+                  className={`rounded-2xl border p-4 shadow-xs transition ${
+                    isTop1
+                      ? "border-[#ffe823] bg-[#fffdf0] ring-2 ring-[#ffe823]/40"
+                      : "border-[#e2e8f0] bg-white"
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      {isTop1 && (
+                        <span className="mb-1 inline-flex items-center gap-1 rounded-full bg-[#ffe823] px-2 py-0.5 text-[9px] font-black text-[#092341]">
+                          <Trophy className="size-3 text-[#d97706]" />
+                          #1 Top Revenue Generator
+                        </span>
+                      )}
+                      <h4 className="font-extrabold text-[#092341] text-xs">
+                        {item.name}
+                      </h4>
+                      <span className="text-[10px] text-[#64748b] uppercase">
+                        {item.category} • {item.ticketCount} orders
+                      </span>
+                    </div>
+
+                    <span className="rounded-full bg-[#F0F7FF] px-2.5 py-1 text-xs font-black text-[#1363DF]">
+                      {item.percentage}%
+                    </span>
+                  </div>
+
+                  <div className="mt-3 flex items-baseline justify-between">
+                    <p className="text-xl font-black text-[#092341]">
+                      {formatKes(item.revenue)}
+                    </p>
+                    <span className="text-xs font-bold text-[#64748b]">
+                      {item.unitsSold} {item.unit}s sold
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
