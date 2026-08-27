@@ -96,6 +96,25 @@ export function parseBookingForm(formData: FormData) {
     })
     .filter((service) => service.quantity > 0);
 
+  const rawPickupSlot = formData.get("pickupSlot") as string;
+  const rawDeliverySlot = formData.get("deliverySlot") as string;
+  const pickupDate = formData.get("pickupDate") as string;
+  const deliveryDate = formData.get("deliveryDate") as string;
+
+  const pickupSlot =
+    rawPickupSlot && rawPickupSlot.trim() !== ""
+      ? rawPickupSlot
+      : pickupDate
+      ? `${pickupDate}T10:00:00.000Z`
+      : "";
+
+  const deliverySlot =
+    rawDeliverySlot && rawDeliverySlot.trim() !== ""
+      ? rawDeliverySlot
+      : deliveryDate
+      ? `${deliveryDate}T15:00:00.000Z`
+      : "";
+
   return bookingSchema.safeParse({
     serviceArea: formData.get("serviceArea"),
     customerName: formData.get("customerName"),
@@ -103,8 +122,8 @@ export function parseBookingForm(formData: FormData) {
     customerEmail: formData.get("customerEmail"),
     address: formData.get("address"),
     specialInstructions: formData.get("specialInstructions"),
-    pickupSlot: `${formData.get("pickupDate")}T10:00:00.000Z`,
-    deliverySlot: `${formData.get("deliveryDate")}T15:00:00.000Z`,
+    pickupSlot,
+    deliverySlot,
     paymentOption: formData.get("paymentOption"),
     consentUpdates: formData.get("consentUpdates") === "on",
     services,

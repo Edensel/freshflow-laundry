@@ -240,17 +240,17 @@ function BookingFormInner({ compact = false }: { compact?: boolean }) {
         signal: controller.signal,
       });
       const data = (await response.json()) as { slots: Slot[] };
-      setPickupSlots(data.slots || []);
-      const firstAvailable = data.slots?.find((slot) => slot.available);
-
-      if (firstAvailable && !data.slots.some((slot) => slot.value === pickupSlot)) {
+      const slots = data.slots || [];
+      setPickupSlots(slots);
+      const firstAvailable = slots.find((slot) => slot.available);
+      if (firstAvailable) {
         setPickupSlot(firstAvailable.value);
       }
     }
 
     loadSlots().catch(() => setPickupSlots([]));
     return () => controller.abort();
-  }, [pickupDate, pickupSlot]);
+  }, [pickupDate]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -260,20 +260,17 @@ function BookingFormInner({ compact = false }: { compact?: boolean }) {
         signal: controller.signal,
       });
       const data = (await response.json()) as { slots: Slot[] };
-      setDeliverySlots(data.slots || []);
-      const firstAvailable = data.slots?.find((slot) => slot.available);
-
-      if (
-        firstAvailable &&
-        !data.slots.some((slot) => slot.value === deliverySlot)
-      ) {
+      const slots = data.slots || [];
+      setDeliverySlots(slots);
+      const firstAvailable = slots.find((slot) => slot.available);
+      if (firstAvailable) {
         setDeliverySlot(firstAvailable.value);
       }
     }
 
     loadSlots().catch(() => setDeliverySlots([]));
     return () => controller.abort();
-  }, [deliveryDate, deliverySlot]);
+  }, [deliveryDate]);
 
   if (state.ok && state.confirmation) {
     const instructions = paymentInstructions(
@@ -492,27 +489,29 @@ function BookingFormInner({ compact = false }: { compact?: boolean }) {
             </label>
             <input
               id="pickupDate"
+              name="pickupDate"
               type="date"
               value={pickupDate}
               min={dateOffset(0)}
               onChange={(event) => setPickupDate(event.target.value)}
               className="mt-1.5 min-h-11 w-full rounded-xl border border-[#cbd5e1] bg-[#f8fafc] px-3 text-sm text-[#092341] outline-none focus:border-[#1363DF]"
             />
+            <input type="hidden" name="pickupSlot" value={pickupSlot || `${pickupDate}T10:00:00.000Z`} />
             <div className="mt-2.5 space-y-2">
               {pickupSlots.length > 0 ? (
                 pickupSlots.map((slot) => (
                   <label
                     key={slot.value}
-                    className={`flex items-center justify-between rounded-xl border px-3 py-2 text-xs font-medium ${
+                    className={`flex items-center justify-between rounded-xl border px-3 py-2 text-xs font-medium cursor-pointer ${
                       slot.available
-                        ? "border-[#cbd5e1] bg-white text-[#092341]"
+                        ? "border-[#cbd5e1] bg-white text-[#092341] hover:border-[#1363DF]"
                         : "border-[#fecaca] bg-[#fef2f2] text-[#991b1b]"
                     }`}
                   >
                     <span>{slot.label}</span>
                     <input
                       type="radio"
-                      name="pickupSlot"
+                      name="pickupSlotRadio"
                       value={slot.value}
                       checked={pickupSlot === slot.value}
                       disabled={!slot.available}
@@ -539,27 +538,29 @@ function BookingFormInner({ compact = false }: { compact?: boolean }) {
             </label>
             <input
               id="deliveryDate"
+              name="deliveryDate"
               type="date"
               value={deliveryDate}
               min={pickupDate}
               onChange={(event) => setDeliveryDate(event.target.value)}
               className="mt-1.5 min-h-11 w-full rounded-xl border border-[#cbd5e1] bg-[#f8fafc] px-3 text-sm text-[#092341] outline-none focus:border-[#1363DF]"
             />
+            <input type="hidden" name="deliverySlot" value={deliverySlot || `${deliveryDate}T15:00:00.000Z`} />
             <div className="mt-2.5 space-y-2">
               {deliverySlots.length > 0 ? (
                 deliverySlots.map((slot) => (
                   <label
                     key={slot.value}
-                    className={`flex items-center justify-between rounded-xl border px-3 py-2 text-xs font-medium ${
+                    className={`flex items-center justify-between rounded-xl border px-3 py-2 text-xs font-medium cursor-pointer ${
                       slot.available
-                        ? "border-[#cbd5e1] bg-white text-[#092341]"
+                        ? "border-[#cbd5e1] bg-white text-[#092341] hover:border-[#1363DF]"
                         : "border-[#fecaca] bg-[#fef2f2] text-[#991b1b]"
                     }`}
                   >
                     <span>{slot.label}</span>
                     <input
                       type="radio"
-                      name="deliverySlot"
+                      name="deliverySlotRadio"
                       value={slot.value}
                       checked={deliverySlot === slot.value}
                       disabled={!slot.available}
