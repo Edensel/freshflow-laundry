@@ -1,6 +1,7 @@
 import "server-only";
 
 import { Pool, type PoolClient, type QueryResultRow } from "pg";
+import { ensureDatabaseSchema } from "@/lib/db-init";
 
 declare global {
   var freshFlowPool: Pool | undefined;
@@ -22,7 +23,7 @@ function getPool() {
       ssl:
         process.env.DATABASE_SSL === "true"
           ? { rejectUnauthorized: false }
-          : undefined,
+          : { rejectUnauthorized: false },
     });
   }
 
@@ -33,13 +34,17 @@ export async function query<T extends QueryResultRow>(
   text: string,
   values: unknown[] = [],
 ) {
-  return getPool().query<T>(text, values);
+  const pool = getPool();
+  await ensureDatabaseSchema(pool);
+  return pool.query<T>(text, values);
 }
 
 export async function transaction<T>(
   callback: (client: PoolClient) => Promise<T>,
 ) {
-  const client = await getPool().connect();
+  const pool = getPool();
+  await ensureDatabaseSchema(pool);
+  const client = await pool.connect();
 
   try {
     await client.query("BEGIN");

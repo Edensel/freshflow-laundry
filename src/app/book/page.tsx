@@ -3,6 +3,9 @@ import { CalendarCheck2, Clock, ShieldCheck, Truck } from "lucide-react";
 import { BookingForm } from "@/components/BookingForm";
 import { businessConfig } from "@/lib/business";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: "Book Doorstep Laundry Pickup in Nairobi | Fresh Flow",
   description:

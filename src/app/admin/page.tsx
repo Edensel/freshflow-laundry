@@ -25,6 +25,9 @@ import { listAllFeedback } from "@/lib/feedback";
 import { getPublicMetrics, listRecentOrders } from "@/lib/orders";
 import { loginAction, logoutAction } from "./actions";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: "Senior Executive Operations Portal | Fresh Flow Nairobi",
   description: "Senior 20+ year architectural back-office portal for order tickets, financial analytics, POS walk-ins, and review moderation.",

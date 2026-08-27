@@ -21,6 +21,8 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { formatKes, statusLabels, statusSteps } from "@/lib/business";
 import type { OrderStatus } from "@/lib/orders";
 
+import { useRouter } from "next/navigation";
+
 type ServiceLine = {
   id: string;
   name: string;
@@ -63,11 +65,20 @@ function formatDate(value: string) {
 }
 
 export function AdminTicketQueue({ orders }: AdminTicketQueueProps) {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [currentPage, setCurrentPage] = useState(1);
   const [dismissedAlertId, setDismissedAlertId] = useState<string | null>(null);
   const [activeAlert, setActiveAlert] = useState<AdminOrder | null>(null);
+
+  // 3-Second Real-Time Live Sync Engine
+  useEffect(() => {
+    const interval = setInterval(() => {
+      router.refresh();
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [router]);
 
   // Automated Real-Time Booking Alert Engine
   useEffect(() => {
