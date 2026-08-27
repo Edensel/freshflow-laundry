@@ -81,6 +81,7 @@ export function SiteHeader() {
               <Link
                 key={item.href}
                 href={item.href}
+                prefetch={true}
                 className="whitespace-nowrap rounded-xl px-2.5 py-2 text-xs font-bold text-[#475569] transition hover:bg-[#F0F7FF] hover:text-[#1363DF] xl:px-3.5 xl:text-sm"
               >
                 {item.label}
@@ -92,6 +93,7 @@ export function SiteHeader() {
           <div className="flex items-center gap-2">
             <Link
               href="/track"
+              prefetch={true}
               className="hidden lg:inline-flex whitespace-nowrap min-h-10 items-center gap-1.5 rounded-xl border border-[#cbd5e1] bg-white px-3 text-xs font-bold text-[#092341] transition hover:border-[#1363DF] hover:bg-[#F0F7FF] hover:text-[#1363DF] xl:px-4 xl:text-sm"
             >
               <Search className="size-3.5 text-[#1363DF] shrink-0" aria-hidden="true" />
@@ -100,6 +102,7 @@ export function SiteHeader() {
 
             <Link
               href="/book"
+              prefetch={true}
               className="hidden lg:inline-flex whitespace-nowrap min-h-10 items-center gap-1.5 rounded-xl bg-[#1363DF] px-3.5 text-xs font-extrabold text-white shadow-md shadow-[#1363DF]/20 transition hover:bg-[#0F4C81] hover:scale-[1.02] xl:px-4.5 xl:text-sm"
             >
               <CalendarCheck2 className="size-3.5 shrink-0" aria-hidden="true" />

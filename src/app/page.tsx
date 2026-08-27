@@ -83,6 +83,7 @@ export default async function Home() {
               {/* Primary CTA: Dominant Lemon Yellow */}
               <Link
                 href="/book"
+                prefetch={true}
                 className="inline-flex min-h-14 items-center gap-3 rounded-2xl bg-[#ffe823] px-8 text-base font-black text-[#092341] shadow-xl shadow-[#ffe823]/25 transition-all hover:bg-[#fff17a] hover:scale-[1.03] active:scale-[0.98]"
               >
                 <CalendarCheck2 className="size-5" aria-hidden="true" />
@@ -92,6 +93,7 @@ export default async function Home() {
               {/* Secondary CTAs: Muted Outlines */}
               <Link
                 href="/book"
+                prefetch={true}
                 className="inline-flex min-h-14 items-center gap-2 rounded-2xl border border-white/30 bg-white/10 px-6 text-sm font-bold text-white backdrop-blur-md transition-all hover:bg-white/20 hover:scale-[1.02]"
               >
                 <span>Customize My Order</span>
@@ -99,6 +101,7 @@ export default async function Home() {
 
               <Link
                 href="/calculator"
+                prefetch={true}
                 className="inline-flex min-h-14 items-center gap-2 rounded-2xl border border-white/20 bg-white/5 px-6 text-sm font-semibold text-white/90 backdrop-blur-md transition-all hover:bg-white/15"
               >
                 <Sparkles className="size-4 text-[#ffe823]" aria-hidden="true" />
@@ -107,6 +110,7 @@ export default async function Home() {
 
               <Link
                 href="/track"
+                prefetch={true}
                 className="inline-flex min-h-14 items-center gap-2 rounded-2xl border border-white/20 bg-white/5 px-6 text-sm font-semibold text-white/90 backdrop-blur-md transition-all hover:bg-white/15"
               >
                 <Search className="size-4 text-[#38BDF8]" aria-hidden="true" />
