@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { redirect } from "next/navigation";
 import {
+  FileSpreadsheet,
   Lock,
   LogOut,
   Mail,
@@ -13,7 +14,9 @@ import {
 } from "lucide-react";
 import { AdminReviewModeration } from "@/components/AdminReviewModeration";
 import { AdminTicketQueue } from "@/components/AdminTicketQueue";
+import { ExecutiveReportingModule } from "@/components/ExecutiveReportingModule";
 import { FinancialAnalytics } from "@/components/FinancialAnalytics";
+import { ReceiptGeneratorModal } from "@/components/ReceiptGeneratorModal";
 import { WalkInOrderModal } from "@/components/WalkInOrderModal";
 import {
   adminPasswordHint,
@@ -174,6 +177,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
+            <ReceiptGeneratorModal orders={rawOrders} />
             <WalkInOrderModal />
             <form action={logoutAction}>
               <button className="inline-flex items-center gap-2 rounded-xl border border-[#cbd5e1] bg-white px-4 py-2 text-xs font-bold text-[#475569] transition hover:bg-[#f8fafc] hover:border-[#092341]">
@@ -209,6 +213,18 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
             >
               <TrendingUp className="size-4" />
               <span>Financial Intelligence</span>
+            </a>
+
+            <a
+              href="/admin?tab=reports"
+              className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-extrabold transition ${
+                activeTab === "reports"
+                  ? "bg-[#092341] text-white shadow-md"
+                  : "text-[#475569] hover:bg-[#f8fafc] hover:text-[#092341]"
+              }`}
+            >
+              <FileSpreadsheet className="size-4" />
+              <span>Executive Reports & Audits</span>
             </a>
 
             <a
@@ -248,7 +264,14 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
           </section>
         )}
 
-        {/* TAB 3: INSTANT REAL-TIME SEARCH REVIEW MODERATION */}
+        {/* TAB 3: EXECUTIVE REPORTS MODULE */}
+        {activeTab === "reports" && (
+          <section className="mt-6">
+            <ExecutiveReportingModule orders={rawOrders} />
+          </section>
+        )}
+
+        {/* TAB 4: INSTANT REAL-TIME SEARCH REVIEW MODERATION */}
         {activeTab === "reviews" && (
           <section className="mt-6">
             <AdminReviewModeration feedbackList={feedbackList} />
