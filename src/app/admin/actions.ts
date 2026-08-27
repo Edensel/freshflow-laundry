@@ -9,7 +9,7 @@ import {
   setAdminSession,
 } from "@/lib/admin-auth";
 import { sendOrderEmail, sendStatusEmail } from "@/lib/email";
-import { createOrder, logNotification, updateOrderStatus, type OrderStatus } from "@/lib/orders";
+import { createOrder, logNotification, updateOrderPaymentStatus, updateOrderStatus, type OrderStatus } from "@/lib/orders";
 import { pushStatusToOsTicket } from "@/lib/osticket";
 import { statusSteps } from "@/lib/business";
 import { approveFeedback, deleteFeedback } from "@/lib/feedback";
@@ -92,6 +92,23 @@ export async function updateStatusAction(formData: FormData) {
 
   revalidatePath("/admin");
   revalidatePath("/track");
+  redirect("/admin");
+}
+
+export async function updatePaymentStatusAction(formData: FormData) {
+  if (!(await isAdminAuthenticated())) {
+    redirect("/admin");
+  }
+
+  const orderId = Number(formData.get("orderId"));
+  const paymentStatus = String(formData.get("paymentStatus")) as "PAID" | "PENDING";
+
+  if (Number.isFinite(orderId) && (paymentStatus === "PAID" || paymentStatus === "PENDING")) {
+    await updateOrderPaymentStatus(orderId, paymentStatus);
+    revalidatePath("/admin");
+    revalidatePath("/track");
+  }
+
   redirect("/admin");
 }
 

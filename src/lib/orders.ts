@@ -696,6 +696,42 @@ export async function updateOrderStatus(params: {
   return order;
 }
 
+export async function updateOrderPaymentStatus(
+  orderId: number,
+  paymentStatus: "PAID" | "PENDING",
+) {
+  if (isDatabaseConfigured()) {
+    try {
+      const result = await query<OrderRow>(
+        `
+          UPDATE orders
+          SET payment_status = $2, updated_at = now()
+          WHERE id = $1
+          RETURNING *
+        `,
+        [orderId, paymentStatus],
+      );
+
+      return result.rows[0] ? mapOrder(result.rows[0]) : null;
+    } catch {
+      logDbFallback("updateOrderPaymentStatus");
+    }
+  }
+
+  const data = await readDemoData();
+  const order = data.orders.find((item) => item.id === orderId);
+
+  if (!order) {
+    return null;
+  }
+
+  order.paymentStatus = paymentStatus;
+  order.updatedAt = new Date().toISOString();
+  await writeDemoData(data);
+
+  return order;
+}
+
 export async function logNotification(params: {
   orderId: number;
   channel: string;

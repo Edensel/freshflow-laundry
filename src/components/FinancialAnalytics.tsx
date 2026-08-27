@@ -2,17 +2,22 @@
 
 import { useMemo, useState } from "react";
 import {
-  BarChart3,
-  Building2,
-  Calendar,
+  AlertCircle,
+  ArrowUpRight,
   CheckCircle2,
+  Clock,
+  CreditCard,
   DollarSign,
+  Filter,
   Globe,
+  PieChart,
+  Receipt,
   Store,
   TrendingUp,
   Wallet,
 } from "lucide-react";
-import { formatKes } from "@/lib/business";
+import { updatePaymentStatusAction } from "@/app/admin/actions";
+import { formatKes, paymentOptions } from "@/lib/business";
 import type { Order } from "@/lib/orders";
 
 type FinancialAnalyticsProps = {
@@ -20,9 +25,19 @@ type FinancialAnalyticsProps = {
 };
 
 type Timeframe = "weekly" | "monthly" | "quarterly" | "yearly";
+type LedgerFilter = "all" | "paid" | "unpaid";
+
+function formatDate(value: string) {
+  return new Date(value).toLocaleString("en-KE", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "Africa/Nairobi",
+  });
+}
 
 export function FinancialAnalytics({ orders }: FinancialAnalyticsProps) {
   const [timeframe, setTimeframe] = useState<Timeframe>("monthly");
+  const [ledgerFilter, setLedgerFilter] = useState<LedgerFilter>("all");
 
   const now = new Date();
 
@@ -40,296 +55,398 @@ export function FinancialAnalytics({ orders }: FinancialAnalyticsProps) {
     });
   }, [orders, timeframe]);
 
-  const totalRevenue = useMemo(
-    () => filteredOrders.reduce((sum, o) => sum + Number(o.priceTotalKe || 0), 0),
-    [filteredOrders]
-  );
-  const totalOrdersCount = filteredOrders.length;
-  const avgOrderValue = totalOrdersCount > 0 ? totalRevenue / totalOrdersCount : 0;
+  // Strict Realized vs Unpaid Financial Calculations
+  const metrics = useMemo(() => {
+    let paidRevenue = 0;
+    let paidCount = 0;
+    let unpaidReceivables = 0;
+    let unpaidCount = 0;
 
-  // Channel Analysis: Walk-In Counter vs Direct Website Bookings
-  const channelMetrics = useMemo(() => {
-    let walkInRevenue = 0;
-    let walkInCount = 0;
-    let onlineRevenue = 0;
-    let onlineCount = 0;
+    let walkInPaid = 0;
+    let walkInUnpaid = 0;
+    let onlinePaid = 0;
+    let onlineUnpaid = 0;
 
     for (const order of filteredOrders) {
+      const amount = Number(order.priceTotalKe || 0);
+      const isPaid = order.paymentStatus === "PAID";
       const isWalkIn =
         order.ticketId.toUpperCase().startsWith("WALK-") ||
         order.serviceArea.toLowerCase().includes("walk-in");
 
-      if (isWalkIn) {
-        walkInRevenue += Number(order.priceTotalKe || 0);
-        walkInCount += 1;
+      if (isPaid) {
+        paidRevenue += amount;
+        paidCount += 1;
+        if (isWalkIn) walkInPaid += amount;
+        else onlinePaid += amount;
       } else {
-        onlineRevenue += Number(order.priceTotalKe || 0);
-        onlineCount += 1;
+        unpaidReceivables += amount;
+        unpaidCount += 1;
+        if (isWalkIn) walkInUnpaid += amount;
+        else onlineUnpaid += amount;
       }
     }
 
-    const walkInPct = totalRevenue > 0 ? Math.round((walkInRevenue / totalRevenue) * 100) : 0;
-    const onlinePct = totalRevenue > 0 ? Math.round((onlineRevenue / totalRevenue) * 100) : 0;
+    const grossPipeline = paidRevenue + unpaidReceivables;
+    const realizationRate =
+      grossPipeline > 0 ? Math.round((paidRevenue / grossPipeline) * 100) : 0;
+    const avgPaidOrderValue = paidCount > 0 ? paidRevenue / paidCount : 0;
 
     return {
-      walkInRevenue,
-      walkInCount,
-      walkInPct,
-      onlineRevenue,
-      onlineCount,
-      onlinePct,
+      paidRevenue,
+      paidCount,
+      unpaidReceivables,
+      unpaidCount,
+      grossPipeline,
+      realizationRate,
+      avgPaidOrderValue,
+      walkInPaid,
+      walkInUnpaid,
+      onlinePaid,
+      onlineUnpaid,
     };
-  }, [filteredOrders, totalRevenue]);
-
-  // Service Category Breakdown
-  const categoryRevenue = useMemo(() => {
-    const cat = {
-      laundry: 0,
-      house_cleaning: 0,
-      carpet_cleaning: 0,
-      fumigation: 0,
-    };
-
-    for (const order of filteredOrders) {
-      for (const line of order.serviceDetails.lines) {
-        const c = line.category || "laundry";
-        if (c in cat) {
-          cat[c as keyof typeof cat] += line.lineTotalKe;
-        } else {
-          cat.laundry += line.lineTotalKe;
-        }
-      }
-    }
-
-    return cat;
   }, [filteredOrders]);
 
-  const categoryPercentages = {
-    laundry: totalRevenue > 0 ? Math.round((categoryRevenue.laundry / totalRevenue) * 100) : 0,
-    house_cleaning: totalRevenue > 0 ? Math.round((categoryRevenue.house_cleaning / totalRevenue) * 100) : 0,
-    carpet_cleaning: totalRevenue > 0 ? Math.round((categoryRevenue.carpet_cleaning / totalRevenue) * 100) : 0,
-    fumigation: totalRevenue > 0 ? Math.round((categoryRevenue.fumigation / totalRevenue) * 100) : 0,
-  };
+  // Filtered Ledger List for Table Display
+  const ledgerOrders = useMemo(() => {
+    if (ledgerFilter === "paid") {
+      return filteredOrders.filter((o) => o.paymentStatus === "PAID");
+    }
+    if (ledgerFilter === "unpaid") {
+      return filteredOrders.filter((o) => o.paymentStatus !== "PAID");
+    }
+    return filteredOrders;
+  }, [filteredOrders, ledgerFilter]);
 
   return (
-    <div className="rounded-3xl border border-[#cbd5e1] bg-white p-6 shadow-sm lg:p-8 text-[#092341]">
+    <div className="space-y-8 text-[#092341]">
       {/* Executive Title Header & Real-Time Timeframe Filter */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#f1f5f9] pb-5">
-        <div>
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#1363DF]">
-            <TrendingUp className="size-4" />
-            <span>Senior Financial Intelligence Engine</span>
-          </div>
-          <h2 className="mt-1 text-2xl font-black text-[#092341]">
-            Executive Financial Dashboard
-          </h2>
-          <p className="mt-0.5 text-xs text-[#64748b]">
-            Real-time revenue tracking across store walk-in register and online direct bookings.
-          </p>
-        </div>
-
-        {/* Timeframe Filter Tabs */}
-        <div className="flex items-center gap-1.5 rounded-2xl border border-[#cbd5e1] bg-[#f8fafc] p-1.5">
-          {(["weekly", "monthly", "quarterly", "yearly"] as Timeframe[]).map((tf) => (
-            <button
-              key={tf}
-              type="button"
-              onClick={() => setTimeframe(tf)}
-              className={`rounded-xl px-3 py-1.5 text-xs font-bold capitalize transition ${
-                timeframe === tf
-                  ? "bg-[#092341] text-white shadow-sm"
-                  : "text-[#64748b] hover:bg-white hover:text-[#092341]"
-              }`}
-            >
-              {tf}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Primary Financial KPI Cards */}
-      <div className="mt-6 grid gap-4 sm:grid-cols-3">
-        <div className="rounded-2xl border border-[#bfdbfe] bg-[#F0F7FF] p-5 shadow-xs">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-[#1363DF]">
-            {timeframe} Total Gross Revenue
-          </span>
-          <div className="mt-2 text-3xl font-black text-[#092341]">
-            {formatKes(totalRevenue)}
-          </div>
-          <p className="mt-1 text-xs text-[#475569]">
-            Gross earnings across all channels ({totalOrdersCount} total tickets)
-          </p>
-        </div>
-
-        <div className="rounded-2xl border border-[#e2e8f0] bg-[#f8fafc] p-5 shadow-xs">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-[#64748b]">
-            Average Order Value (AOV)
-          </span>
-          <div className="mt-2 text-3xl font-black text-[#16a34a]">
-            {formatKes(avgOrderValue)}
-          </div>
-          <p className="mt-1 text-xs text-[#64748b]">Average ticket size in selected {timeframe} window</p>
-        </div>
-
-        <div className="rounded-2xl border border-[#e2e8f0] bg-[#f8fafc] p-5 shadow-xs">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-[#64748b]">
-            Order Volume Count
-          </span>
-          <div className="mt-2 text-3xl font-black text-[#092341]">
-            {totalOrdersCount} <span className="text-sm font-normal text-[#64748b]">tickets</span>
-          </div>
-          <p className="mt-1 text-xs text-[#64748b]">Completed & active tickets</p>
-        </div>
-      </div>
-
-      {/* Channel Breakdown Section: Walk-In Counter vs Direct Website Bookings */}
-      <div className="mt-8 border-t border-[#f1f5f9] pt-6">
-        <div className="flex items-center justify-between gap-2 mb-4">
+      <div className="rounded-3xl border border-[#cbd5e1] bg-white p-6 shadow-sm lg:p-8">
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#f1f5f9] pb-5">
           <div>
-            <h3 className="text-sm font-extrabold text-[#092341] uppercase tracking-wider">
-              Booking Channel Financial Distribution
-            </h3>
-            <p className="text-xs text-[#64748b]">
-              Comparison between Store Walk-In POS register and Website Direct online bookings
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#1363DF]">
+              <TrendingUp className="size-4" />
+              <span>Real-Time Cash Accounting & Intelligence Engine</span>
+            </div>
+            <h2 className="mt-1 text-2xl font-black text-[#092341]">
+              Executive Financial Realization Dashboard
+            </h2>
+            <p className="mt-0.5 text-xs text-[#64748b]">
+              Strict segregation of realized paid cash revenue vs pending accounts receivable.
             </p>
+          </div>
+
+          {/* Timeframe Filter Tabs */}
+          <div className="flex items-center gap-1.5 rounded-2xl border border-[#cbd5e1] bg-[#f8fafc] p-1.5">
+            {(["weekly", "monthly", "quarterly", "yearly"] as Timeframe[]).map((tf) => (
+              <button
+                key={tf}
+                type="button"
+                onClick={() => setTimeframe(tf)}
+                className={`rounded-xl px-3 py-1.5 text-xs font-bold capitalize transition ${
+                  timeframe === tf
+                    ? "bg-[#092341] text-[#ffe823] shadow-sm"
+                    : "text-[#64748b] hover:bg-white hover:text-[#092341]"
+                }`}
+              >
+                {tf}
+              </button>
+            ))}
           </div>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          {/* Store Walk-In POS Register */}
-          <div className="rounded-2xl border border-[#e2e8f0] bg-[#fffdf0] p-5 shadow-xs">
-            <div className="flex items-center justify-between text-xs">
-              <span className="flex items-center gap-1.5 font-extrabold text-[#092341]">
-                <Store className="size-4 text-[#d97706]" />
-                Store Counter Walk-In POS
+        {/* Primary Realized vs Unpaid Financial KPI Grid */}
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {/* 🟢 Realized Cash Revenue (PAID) */}
+          <div className="rounded-2xl border border-[#bbf7d0] bg-[#f0fdf4] p-5 shadow-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-black uppercase tracking-wider text-[#16a34a]">
+                🟢 Confirmed Cash Realized
               </span>
-              <span className="rounded-full bg-[#fef3c7] px-2.5 py-0.5 font-extrabold text-[#b45309]">
-                {channelMetrics.walkInPct}% of Revenue
-              </span>
+              <CheckCircle2 className="size-5 text-[#16a34a]" />
             </div>
-
-            <div className="mt-3 flex items-baseline justify-between">
-              <p className="text-2xl font-black text-[#092341]">
-                {formatKes(channelMetrics.walkInRevenue)}
-              </p>
-              <span className="text-xs font-bold text-[#64748b]">
-                {channelMetrics.walkInCount} tickets
-              </span>
+            <div className="mt-2 text-3xl font-black text-[#15803d]">
+              {formatKes(metrics.paidRevenue)}
             </div>
-
-            <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-[#fef3c7]">
-              <div
-                className="h-full bg-[#d97706] transition-all duration-500"
-                style={{ width: `${channelMetrics.walkInPct}%` }}
-              />
+            <div className="mt-2 flex items-center justify-between text-xs text-[#16a34a]">
+              <span>{metrics.paidCount} Paid Tickets</span>
+              <span className="font-bold">Realized Revenue</span>
             </div>
           </div>
 
-          {/* Website Direct Online Bookings */}
-          <div className="rounded-2xl border border-[#e2e8f0] bg-[#f0f9ff] p-5 shadow-xs">
-            <div className="flex items-center justify-between text-xs">
-              <span className="flex items-center gap-1.5 font-extrabold text-[#092341]">
-                <Globe className="size-4 text-[#0284c7]" />
-                Direct Website Online Bookings
+          {/* ⏳ Pending Receivables (UNPAID) */}
+          <div className="rounded-2xl border border-[#fde68a] bg-[#fffbeb] p-5 shadow-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-black uppercase tracking-wider text-[#b45309]">
+                ⏳ Unpaid Receivables
               </span>
-              <span className="rounded-full bg-[#e0f2fe] px-2.5 py-0.5 font-extrabold text-[#0369a1]">
-                {channelMetrics.onlinePct}% of Revenue
-              </span>
+              <Clock className="size-5 text-[#d97706]" />
             </div>
-
-            <div className="mt-3 flex items-baseline justify-between">
-              <p className="text-2xl font-black text-[#092341]">
-                {formatKes(channelMetrics.onlineRevenue)}
-              </p>
-              <span className="text-xs font-bold text-[#64748b]">
-                {channelMetrics.onlineCount} tickets
-              </span>
+            <div className="mt-2 text-3xl font-black text-[#b45309]">
+              {formatKes(metrics.unpaidReceivables)}
             </div>
-
-            <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-[#e0f2fe]">
-              <div
-                className="h-full bg-[#0284c7] transition-all duration-500"
-                style={{ width: `${channelMetrics.onlinePct}%` }}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Service Category Revenue Breakdown */}
-      <div className="mt-8 border-t border-[#f1f5f9] pt-6">
-        <h3 className="text-sm font-extrabold text-[#092341] uppercase tracking-wider mb-4">
-          Service Category Revenue Breakdown
-        </h3>
-
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {/* Laundry */}
-          <div className="rounded-2xl border border-[#e2e8f0] bg-white p-4 shadow-xs">
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-bold text-[#092341]">🧺 Laundry & Dry Cleaning</span>
-              <span className="font-bold text-[#1363DF]">{categoryPercentages.laundry}%</span>
-            </div>
-            <p className="mt-2 text-xl font-black text-[#092341]">
-              {formatKes(categoryRevenue.laundry)}
-            </p>
-            <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-[#f1f5f9]">
-              <div
-                className="h-full bg-[#1363DF] transition-all duration-500"
-                style={{ width: `${categoryPercentages.laundry}%` }}
-              />
+            <div className="mt-2 flex items-center justify-between text-xs text-[#b45309]">
+              <span>{metrics.unpaidCount} Pending Payments</span>
+              <span className="font-bold">Outstanding</span>
             </div>
           </div>
 
-          {/* House Cleaning */}
-          <div className="rounded-2xl border border-[#e2e8f0] bg-white p-4 shadow-xs">
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-bold text-[#092341]">🧹 House Cleaning</span>
-              <span className="font-bold text-[#16a34a]">{categoryPercentages.house_cleaning}%</span>
+          {/* 📊 Total Gross Pipeline Value */}
+          <div className="rounded-2xl border border-[#bfdbfe] bg-[#f0f9ff] p-5 shadow-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-black uppercase tracking-wider text-[#0369a1]">
+                📊 Gross Pipeline Value
+              </span>
+              <Wallet className="size-5 text-[#0284c7]" />
             </div>
-            <p className="mt-2 text-xl font-black text-[#092341]">
-              {formatKes(categoryRevenue.house_cleaning)}
-            </p>
-            <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-[#f1f5f9]">
+            <div className="mt-2 text-3xl font-black text-[#092341]">
+              {formatKes(metrics.grossPipeline)}
+            </div>
+            <div className="mt-2 flex items-center justify-between text-xs text-[#0369a1]">
+              <span>{filteredOrders.length} Total Tickets</span>
+              <span className="font-bold">Paid + Unpaid</span>
+            </div>
+          </div>
+
+          {/* 📈 Collection Realization Rate */}
+          <div className="rounded-2xl border border-[#cbd5e1] bg-[#f8fafc] p-5 shadow-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-black uppercase tracking-wider text-[#64748b]">
+                📈 Realization Rate
+              </span>
+              <Receipt className="size-5 text-[#64748b]" />
+            </div>
+            <div className="mt-2 text-3xl font-black text-[#092341]">
+              {metrics.realizationRate}%
+            </div>
+            <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-[#e2e8f0]">
               <div
                 className="h-full bg-[#16a34a] transition-all duration-500"
-                style={{ width: `${categoryPercentages.house_cleaning}%` }}
+                style={{ width: `${metrics.realizationRate}%` }}
               />
             </div>
+          </div>
+        </div>
+
+        {/* Channel Breakdown: Walk-In Counter vs Website Direct Realization */}
+        <div className="mt-8 border-t border-[#f1f5f9] pt-6">
+          <h3 className="text-sm font-extrabold text-[#092341] uppercase tracking-wider mb-4">
+            Booking Channel Cash Realization Analysis
+          </h3>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            {/* Store Walk-In POS Register */}
+            <div className="rounded-2xl border border-[#e2e8f0] bg-[#fffdf0] p-5 shadow-xs">
+              <div className="flex items-center justify-between text-xs">
+                <span className="flex items-center gap-1.5 font-extrabold text-[#092341]">
+                  <Store className="size-4 text-[#d97706]" />
+                  Store Walk-in Counter POS
+                </span>
+                <span className="rounded-full bg-[#fef3c7] px-2.5 py-0.5 font-bold text-[#b45309]">
+                  Walk-In Receipts
+                </span>
+              </div>
+
+              <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
+                <div className="rounded-xl bg-[#f0fdf4] p-3 border border-[#bbf7d0]">
+                  <span className="text-[10px] font-bold text-[#16a34a] uppercase">Realized Paid</span>
+                  <p className="mt-1 text-lg font-black text-[#15803d]">
+                    {formatKes(metrics.walkInPaid)}
+                  </p>
+                </div>
+
+                <div className="rounded-xl bg-[#fffbeb] p-3 border border-[#fde68a]">
+                  <span className="text-[10px] font-bold text-[#b45309] uppercase">Pending Unpaid</span>
+                  <p className="mt-1 text-lg font-black text-[#b45309]">
+                    {formatKes(metrics.walkInUnpaid)}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Direct Website Online Bookings */}
+            <div className="rounded-2xl border border-[#e2e8f0] bg-[#f0f9ff] p-5 shadow-xs">
+              <div className="flex items-center justify-between text-xs">
+                <span className="flex items-center gap-1.5 font-extrabold text-[#092341]">
+                  <Globe className="size-4 text-[#0284c7]" />
+                  Direct Website Online Bookings
+                </span>
+                <span className="rounded-full bg-[#e0f2fe] px-2.5 py-0.5 font-bold text-[#0369a1]">
+                  Online Portal
+                </span>
+              </div>
+
+              <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
+                <div className="rounded-xl bg-[#f0fdf4] p-3 border border-[#bbf7d0]">
+                  <span className="text-[10px] font-bold text-[#16a34a] uppercase">Realized Paid</span>
+                  <p className="mt-1 text-lg font-black text-[#15803d]">
+                    {formatKes(metrics.onlinePaid)}
+                  </p>
+                </div>
+
+                <div className="rounded-xl bg-[#fffbeb] p-3 border border-[#fde68a]">
+                  <span className="text-[10px] font-bold text-[#b45309] uppercase">Pending Unpaid</span>
+                  <p className="mt-1 text-lg font-black text-[#b45309]">
+                    {formatKes(metrics.onlineUnpaid)}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Interactive Financial Ledger Table (Paid vs Unpaid Direct Action) */}
+      <div className="rounded-3xl border border-[#cbd5e1] bg-white p-6 shadow-sm lg:p-8">
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#f1f5f9] pb-4">
+          <div>
+            <h3 className="text-lg font-black text-[#092341]">
+              Financial Transaction Ledger
+            </h3>
+            <p className="text-xs text-[#64748b]">
+              Inspect transaction details, verify M-Pesa receipts, and mark tickets as paid in real time.
+            </p>
           </div>
 
-          {/* Carpet Cleaning */}
-          <div className="rounded-2xl border border-[#e2e8f0] bg-white p-4 shadow-xs">
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-bold text-[#092341]">🛋️ Carpet Cleaning</span>
-              <span className="font-bold text-[#f59e0b]">{categoryPercentages.carpet_cleaning}%</span>
-            </div>
-            <p className="mt-2 text-xl font-black text-[#092341]">
-              {formatKes(categoryRevenue.carpet_cleaning)}
-            </p>
-            <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-[#f1f5f9]">
-              <div
-                className="h-full bg-[#f59e0b] transition-all duration-500"
-                style={{ width: `${categoryPercentages.carpet_cleaning}%` }}
-              />
-            </div>
-          </div>
+          {/* Paid vs Unpaid Filter Buttons */}
+          <div className="flex items-center gap-1 rounded-xl bg-[#f8fafc] p-1 border border-[#cbd5e1]">
+            <button
+              type="button"
+              onClick={() => setLedgerFilter("all")}
+              className={`rounded-lg px-3 py-1.5 text-xs font-extrabold transition ${
+                ledgerFilter === "all"
+                  ? "bg-[#092341] text-white shadow-xs"
+                  : "text-[#64748b] hover:bg-white"
+              }`}
+            >
+              All Transactions ({filteredOrders.length})
+            </button>
 
-          {/* Fumigation */}
-          <div className="rounded-2xl border border-[#e2e8f0] bg-white p-4 shadow-xs">
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-bold text-[#092341]">🪲 Pest & Fumigation</span>
-              <span className="font-bold text-[#8b5cf6]">{categoryPercentages.fumigation}%</span>
-            </div>
-            <p className="mt-2 text-xl font-black text-[#092341]">
-              {formatKes(categoryRevenue.fumigation)}
-            </p>
-            <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-[#f1f5f9]">
-              <div
-                className="h-full bg-[#8b5cf6] transition-all duration-500"
-                style={{ width: `${categoryPercentages.fumigation}%` }}
-              />
-            </div>
+            <button
+              type="button"
+              onClick={() => setLedgerFilter("paid")}
+              className={`rounded-lg px-3 py-1.5 text-xs font-extrabold transition ${
+                ledgerFilter === "paid"
+                  ? "bg-[#16a34a] text-white shadow-xs"
+                  : "text-[#64748b] hover:bg-white"
+              }`}
+            >
+              🟢 Realized Paid ({metrics.paidCount})
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setLedgerFilter("unpaid")}
+              className={`rounded-lg px-3 py-1.5 text-xs font-extrabold transition ${
+                ledgerFilter === "unpaid"
+                  ? "bg-[#d97706] text-white shadow-xs"
+                  : "text-[#64748b] hover:bg-white"
+              }`}
+            >
+              ⏳ Unpaid Pending ({metrics.unpaidCount})
+            </button>
           </div>
+        </div>
+
+        {/* Ledger Table */}
+        <div className="mt-4 overflow-x-auto">
+          <table className="w-full text-left text-xs">
+            <thead>
+              <tr className="border-b border-[#e2e8f0] bg-[#f8fafc] text-[#64748b] uppercase tracking-wider font-extrabold">
+                <th className="p-3">Ticket ID / Ref</th>
+                <th className="p-3">Customer</th>
+                <th className="p-3">Channel / Location</th>
+                <th className="p-3">Amount</th>
+                <th className="p-3">Payment Method</th>
+                <th className="p-3">Status</th>
+                <th className="p-3 text-right">Accounting Action</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#f1f5f9]">
+              {ledgerOrders.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="p-6 text-center text-[#94a3b8]">
+                    No financial records match the selected filter.
+                  </td>
+                </tr>
+              ) : (
+                ledgerOrders.map((order) => {
+                  const isPaid = order.paymentStatus === "PAID";
+                  const paymentOptionLabel =
+                    paymentOptions.find((p) => p.id === order.paymentOption)?.label ||
+                    order.paymentOption;
+
+                  return (
+                    <tr key={order.id} className="hover:bg-[#f8fafc]/80 transition">
+                      <td className="p-3 font-bold text-[#092341]">
+                        {order.ticketId}
+                        <span className="block text-[10px] text-[#94a3b8]">
+                          {formatDate(order.createdAt)}
+                        </span>
+                      </td>
+
+                      <td className="p-3">
+                        <span className="font-bold text-[#092341]">{order.customerName}</span>
+                        <span className="block text-[10px] text-[#64748b]">
+                          {order.customerPhone}
+                        </span>
+                      </td>
+
+                      <td className="p-3 font-semibold text-[#475569]">
+                        {order.serviceArea}
+                      </td>
+
+                      <td className="p-3 font-black text-sm text-[#092341]">
+                        {formatKes(order.priceTotalKe)}
+                      </td>
+
+                      <td className="p-3 text-[#475569]">
+                        <span className="inline-flex items-center gap-1 rounded-md bg-[#f1f5f9] px-2 py-0.5 text-[11px] font-bold">
+                          <CreditCard className="size-3 text-[#1363DF]" />
+                          {paymentOptionLabel}
+                        </span>
+                      </td>
+
+                      <td className="p-3">
+                        {isPaid ? (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-[#f0fdf4] px-2.5 py-1 text-[10px] font-black uppercase text-[#16a34a]">
+                            <CheckCircle2 className="size-3" />
+                            PAID
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-[#fffbeb] px-2.5 py-1 text-[10px] font-black uppercase text-[#b45309]">
+                            <Clock className="size-3" />
+                            UNPAID
+                          </span>
+                        )}
+                      </td>
+
+                      <td className="p-3 text-right">
+                        <form action={updatePaymentStatusAction} className="inline-block">
+                          <input type="hidden" name="orderId" value={order.id} />
+                          <input
+                            type="hidden"
+                            name="paymentStatus"
+                            value={isPaid ? "PENDING" : "PAID"}
+                          />
+                          <button
+                            type="submit"
+                            className={`rounded-xl px-3 py-1.5 text-[11px] font-extrabold transition shadow-2xs ${
+                              isPaid
+                                ? "border border-[#cbd5e1] bg-white text-[#64748b] hover:bg-[#f8fafc]"
+                                : "bg-[#16a34a] text-white hover:bg-[#15803d]"
+                            }`}
+                          >
+                            {isPaid ? "Mark Unpaid" : "Mark as Paid ✓"}
+                          </button>
+                        </form>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
