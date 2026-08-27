@@ -11,6 +11,14 @@ import {
   type ServiceId,
 } from "@/lib/pricing";
 
+function sanitizeInputString(value: unknown): string {
+  if (typeof value !== "string") return "";
+  return value
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+    .replace(/<[^>]+>/g, "")
+    .trim();
+}
+
 const serviceIds = serviceCatalog.map((service) => service.id) as [
   ServiceId,
   ...ServiceId[],
@@ -23,8 +31,14 @@ const paymentIds = paymentOptions.map((option) => option.id) as [
 
 export const bookingSchema = z
   .object({
-    serviceArea: z.string().trim().min(2).max(120),
-    customerName: z.string().trim().min(2).max(120),
+    serviceArea: z
+      .string()
+      .transform(sanitizeInputString)
+      .pipe(z.string().min(2).max(120)),
+    customerName: z
+      .string()
+      .transform(sanitizeInputString)
+      .pipe(z.string().min(2).max(120)),
     customerPhone: z
       .string()
       .trim()
@@ -33,8 +47,15 @@ export const bookingSchema = z
         message: "Use a valid Kenya phone number, e.g. +254 789 920 270.",
       }),
     customerEmail: z.string().trim().email().max(160),
-    address: z.string().trim().min(5).max(320),
-    specialInstructions: z.string().trim().max(1000).optional(),
+    address: z
+      .string()
+      .transform(sanitizeInputString)
+      .pipe(z.string().min(5).max(320)),
+    specialInstructions: z
+      .string()
+      .transform(sanitizeInputString)
+      .pipe(z.string().max(1000))
+      .optional(),
     pickupSlot: z.string().min(5),
     deliverySlot: z.string().min(5),
     paymentOption: z.enum(paymentIds),

@@ -1,7 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
+  Bell,
+  BellRing,
   ChevronLeft,
   ChevronRight,
   Filter,
@@ -10,6 +12,7 @@ import {
   Phone,
   Search,
   Send,
+  Sparkles,
   User,
   X,
 } from "lucide-react";
@@ -63,6 +66,18 @@ export function AdminTicketQueue({ orders }: AdminTicketQueueProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [dismissedAlertId, setDismissedAlertId] = useState<string | null>(null);
+  const [activeAlert, setActiveAlert] = useState<AdminOrder | null>(null);
+
+  // Automated Real-Time Booking Alert Engine
+  useEffect(() => {
+    if (orders.length > 0) {
+      const latest = orders[0];
+      if (latest && latest.ticketId !== dismissedAlertId) {
+        setActiveAlert(latest);
+      }
+    }
+  }, [orders, dismissedAlertId]);
 
   const filteredOrders = useMemo(() => {
     return orders.filter((order) => {
@@ -120,6 +135,59 @@ export function AdminTicketQueue({ orders }: AdminTicketQueueProps) {
 
   return (
     <div className="space-y-5">
+      {/* Automated Real-Time Client Booking Alert Toast Banner */}
+      {activeAlert && (
+        <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-[#ffe823]/60 bg-[#092341] p-4 text-white shadow-xl animate-in fade-in slide-in-from-top-3 duration-300">
+          <div className="flex items-center gap-3">
+            <span className="relative flex size-10 items-center justify-center rounded-xl bg-[#ffe823] text-[#092341]">
+              <BellRing className="size-5 animate-bounce" />
+              <span className="absolute -right-1 -top-1 size-3 rounded-full bg-[#ef4444] ring-2 ring-[#092341]" />
+            </span>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-extrabold uppercase tracking-wider text-[#ffe823]">
+                  ⚡ Automated Real-Time Client Booking Alert
+                </span>
+                <span className="rounded-full bg-[#1363DF] px-2 py-0.5 text-[10px] font-bold text-white">
+                  Fast Service Trigger
+                </span>
+              </div>
+              <p className="mt-0.5 text-sm font-black text-white">
+                New Order Received: <span className="text-[#ffe823]">{activeAlert.ticketId}</span> — {activeAlert.customerName} ({activeAlert.serviceArea})
+              </p>
+              <p className="text-xs text-white/70">
+                Amount: <strong>{formatKes(activeAlert.priceTotalKe)}</strong> | Phone: <strong>{activeAlert.customerPhone}</strong>
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setSearchQuery(activeAlert.ticketId);
+                setDismissedAlertId(activeAlert.ticketId);
+                setActiveAlert(null);
+              }}
+              className="rounded-xl bg-[#1363DF] px-3.5 py-2 text-xs font-bold text-white transition hover:bg-[#0F4C81]"
+            >
+              View Ticket Details
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setDismissedAlertId(activeAlert.ticketId);
+                setActiveAlert(null);
+              }}
+              className="rounded-xl border border-white/20 p-2 text-white/70 hover:bg-white/10 hover:text-white"
+              aria-label="Dismiss Alert"
+            >
+              <X className="size-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Real-Time Live Search & Filter Bar */}
       <div className="rounded-2xl border border-[#e2e8f0] bg-white p-4 shadow-xs">
         <div className="flex flex-wrap items-center gap-3">
