@@ -44,11 +44,19 @@ async function writeDemoFeedback(items: FeedbackItem[]): Promise<void> {
     const raw = await readFile(demoDataPath, "utf-8");
     parsed = JSON.parse(raw);
   } catch {
-    await mkdir(path.dirname(demoDataPath), { recursive: true });
+    try {
+      await mkdir(path.dirname(demoDataPath), { recursive: true });
+    } catch {
+      // Ignore
+    }
   }
 
   parsed.feedback = items;
-  await writeFile(demoDataPath, JSON.stringify(parsed, null, 2), "utf-8");
+  try {
+    await writeFile(demoDataPath, JSON.stringify(parsed, null, 2), "utf-8");
+  } catch {
+    // Ignore write error on read-only serverless environment
+  }
 }
 
 function mapRow(row: FeedbackRow): FeedbackItem {

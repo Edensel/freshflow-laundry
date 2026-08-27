@@ -140,8 +140,12 @@ async function ensureDemoDataFile(): Promise<DemoData> {
       history: [],
       notifications: [],
     };
-    await mkdir(path.dirname(demoDataPath), { recursive: true });
-    await writeFile(demoDataPath, JSON.stringify(defaultData, null, 2), "utf-8");
+    try {
+      await mkdir(path.dirname(demoDataPath), { recursive: true });
+      await writeFile(demoDataPath, JSON.stringify(defaultData, null, 2), "utf-8");
+    } catch {
+      // Ignore write errors on read-only serverless environments
+    }
     return defaultData;
   }
 }
@@ -151,8 +155,12 @@ async function readDemoData(): Promise<DemoData> {
 }
 
 async function writeDemoData(data: DemoData): Promise<void> {
-  await mkdir(path.dirname(demoDataPath), { recursive: true });
-  await writeFile(demoDataPath, JSON.stringify(data, null, 2), "utf-8");
+  try {
+    await mkdir(path.dirname(demoDataPath), { recursive: true });
+    await writeFile(demoDataPath, JSON.stringify(data, null, 2), "utf-8");
+  } catch {
+    // Ignore write errors on read-only serverless environments
+  }
 }
 
 async function createDemoOrder(input: BookingInput, quote: Quote): Promise<Order> {

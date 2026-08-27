@@ -6,6 +6,7 @@ import Link from "next/link";
 import {
   CalendarCheck2,
   Clock,
+  Lock,
   Menu,
   PhoneCall,
   Search,
@@ -33,7 +34,7 @@ export function SiteHeader() {
               {businessConfig.serviceWindowLabel}
             </span>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             <a
               href={`tel:${businessConfig.phone.replace(/[\s]/g, "")}`}
               className="flex items-center gap-1 font-semibold text-white transition hover:text-[#ffe823] whitespace-nowrap"
@@ -41,6 +42,14 @@ export function SiteHeader() {
               <PhoneCall className="size-3.5 text-[#ffe823] shrink-0" />
               <span>{businessConfig.phone}</span>
             </a>
+            <span className="text-white/40">|</span>
+            <Link
+              href="/admin"
+              className="flex items-center gap-1 font-medium text-white/90 transition hover:text-[#ffe823] whitespace-nowrap"
+            >
+              <Lock className="size-3 text-[#38BDF8] shrink-0" />
+              <span>Staff Login</span>
+            </Link>
           </div>
         </div>
       </div>
