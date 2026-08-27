@@ -78,7 +78,7 @@ export default function ServicesPage() {
                         {cat.name}
                       </h2>
                       <p className="text-xs text-[#64748b]">
-                        Premium solutions tailored for Nairobi households & commercial clients
+                        Reliable care tailored for Nairobi households & commercial clients
                       </p>
                     </div>
                   </div>

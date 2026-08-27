@@ -49,7 +49,7 @@ const staticTestimonials: TestimonialCardData[] = [
     role: "Resident in Runda",
     rating: 5,
     text: "Top-tier garment care in Nairobi! My designer jackets and shirts came back packaged like brand new garments from an international boutique.",
-    service: "Premium Garment Care",
+    service: "Laundry & Garment Care",
   },
 ];
 

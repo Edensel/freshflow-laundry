@@ -9,29 +9,29 @@ const transformations = [
   {
     id: "suits",
     label: "Suits & Formalwear",
-    tagline: "Master Dry Cleaning & Italian Steam Press",
+    tagline: "Italian Steam Press Dry Cleaning",
     beforeText: "Wrinkled wool blend with collar oils and dull lapels",
-    afterText: "Crisp architectural press, 100% odor-free, restored structure",
+    afterText: "Neat steam press, clean odor-free finish",
     image: "/images/original-site/hero-02.jpg",
-    highlights: ["Fiber-safe dry cleaning", "Hand lapel pressing", "Breathable garment bag cover"],
+    highlights: ["Fiber-safe dry cleaning", "Hand lapel pressing", "Breathable garment cover"],
   },
   {
     id: "bedding",
     label: "Duvets & Bedding",
-    tagline: "Deep Allergen Removal & Down Fluff Restore",
-    beforeText: "Flattened duvet with trapped dust mites and dull linen softness",
-    afterText: "Plump, fragrant down fill, 99.9% sanitized, hotel-grade freshness",
+    tagline: "Allergen Washing & Down Fluff Restore",
+    beforeText: "Flattened duvet with trapped dust and dull fabric",
+    afterText: "Plump down fill, sanitized, fresh linen feel",
     image: "/images/original-site/hero-03.jpg",
     highlights: ["Thermal sanitization wash", "Anti-allergen rinse", "Air-fluffed finish"],
   },
   {
     id: "daily",
     label: "Everyday Wash & Fold",
-    tagline: "Gentle Eco Wash & Tidy Compartment Fold",
+    tagline: "Gentle Wash & Tidy Fold",
     beforeText: "Mixed basket with tough collar stains and dye bleed risk",
     afterText: "Bright colors, soft touch, neatly folded into ready-to-wear stacks",
     image: "/images/original-site/washing.jpg",
-    highlights: ["Color-separate cycles", "Zero harsh chemicals", "Neat ribbon-packed bundle"],
+    highlights: ["Color-separate cycles", "Zero harsh chemicals", "Neat bundled packaging"],
   },
 ];
 
@@ -46,10 +46,10 @@ export function GarmentTransformation() {
         <div>
           <div className="inline-flex items-center gap-2 rounded-full bg-[#1363DF]/10 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-[#1363DF]">
             <Wand2 className="size-4" />
-            <span>Garment Care Transformation</span>
+            <span>Before & After</span>
           </div>
           <h3 className="mt-2 text-2xl font-black text-[#092341] sm:text-3xl">
-            See The Master Touch
+            See the Difference
           </h3>
         </div>
 
@@ -135,9 +135,9 @@ export function GarmentTransformation() {
           <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-white">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-xs font-bold backdrop-blur-md">
               <Sparkles className="size-3.5 text-[#ffe823]" />
-              Studio Inspection Guarantee
+              Every Order Checked Before Delivery
             </span>
-            <span className="text-xs font-semibold text-white/80">Nairobi Garment Care Studio</span>
+            <span className="text-xs font-semibold text-white/80">Nairobi Doorstep Service</span>
           </div>
         </div>
       </div>

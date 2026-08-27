@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     template: "%s | Fresh Flow Laundry Services",
   },
   description:
-    "Premium pickup laundry, dry cleaning, ironing, bedding care, and corporate laundry order tracking for Nairobi, Kenya.",
+    "Doorstep pickup laundry, dry cleaning, house cleaning, carpet shampooing, and pest control across Nairobi, Kenya.",
   openGraph: {
     title: "Fresh Flow Laundry Services",
     description:

@@ -17,7 +17,7 @@ export function Footer() {
             className="h-12 w-auto brightness-110"
           />
           <p className="mt-4 text-sm leading-relaxed text-white/70">
-            Nairobi&apos;s trusted premium fabric care studio. Professional wash & fold, eco-friendly dry cleaning, hotel linen service, and doorstep delivery.
+            Nairobi&apos;s doorstep laundry, cleaning, and pest control service. Professional wash & fold, eco-friendly dry cleaning, and home care.
           </p>
           <div className="mt-4 flex items-center gap-2 text-xs font-semibold text-[#ffe823]">
             <ShieldCheck className="size-4" />

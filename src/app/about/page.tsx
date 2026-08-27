@@ -14,7 +14,7 @@ import { businessConfig } from "@/lib/business";
 export const metadata: Metadata = {
   title: "About Us & Our Fabric Care Promise | Fresh Flow Nairobi",
   description:
-    "Learn about Fresh Flow Laundry Services. Nairobi's dedicated eco-friendly garment care studio providing 24h doorstep laundry and dry cleaning.",
+    "Learn about Fresh Flow Laundry Services. Nairobi's dedicated doorstep laundry and dry cleaning service providing 24h pickup & delivery.",
 };
 
 export default function AboutPage() {
@@ -27,10 +27,10 @@ export default function AboutPage() {
               Our Story & Promise
             </span>
             <h1 className="mt-2 text-4xl font-extrabold text-[#092341] sm:text-5xl">
-              Nairobi&apos;s Dedicated Laundry & Fabric Care Studio
+              Nairobi&apos;s Dedicated Doorstep Laundry & House Care Service
             </h1>
             <p className="mt-4 text-base leading-relaxed text-[#64748b]">
-              At Fresh Flow, we believe fresh, spotless clothes give you confidence every day. Founded in Nairobi, we set out to redefine garment care by combining high-capacity modern washing tech, eco-friendly gentle detergents, doorstep convenience, and complete ticket tracking transparency.
+              At Fresh Flow, we believe clean, fresh clothes and a sanitized home give you peace of mind every day. Founded in Nairobi, we set out to make laundry and cleaning simple by combining modern washing equipment, eco-friendly gentle detergents, doorstep pickup, and complete ticket tracking transparency.
             </p>
 
             <div className="mt-8 grid gap-4 sm:grid-cols-2">
@@ -55,7 +55,7 @@ export default function AboutPage() {
           <div className="relative aspect-4/3 overflow-hidden rounded-3xl border border-[#e2e8f0] shadow-xl lg:col-span-5">
             <Image
               src="/images/original-site/laundry-machine.jpg"
-              alt="Fresh Flow studio washing machinery"
+              alt="Fresh Flow washing machinery"
               fill
               className="object-cover"
             />
@@ -76,7 +76,7 @@ export default function AboutPage() {
               <div className="flex size-9 items-center justify-center rounded-lg bg-[#F0F7FF] text-[#1363DF]">
                 <MapPin className="size-5" />
               </div>
-              <p className="mt-3 text-xs font-bold uppercase text-[#94a3b8]">Service Studio</p>
+              <p className="mt-3 text-xs font-bold uppercase text-[#94a3b8]">Central Facility</p>
               <p className="mt-1 text-sm font-semibold text-[#092341]">{businessConfig.address}</p>
             </div>
 

@@ -13,9 +13,9 @@ export type TestimonialCardData = {
 };
 
 const categoryTabs = [
-  { id: "all", label: "✨ All Reviews" },
-  { id: "wash_fold", label: "🧺 Wash & Fold" },
-  { id: "suit", label: "👔 Suit Dry Cleaning" },
+  { id: "all", label: "🌟 All Reviews" },
+  { id: "laundry", label: "🧺 Laundry Care" },
+  { id: "house_cleaning", label: "🧹 House Cleaning" },
   { id: "bedding", label: "🛏️ Bedding & Duvets" },
   { id: "ironing", label: "♨️ Express Wash & Iron" },
   { id: "corporate", label: "🏢 Corporate Linen" },
@@ -34,7 +34,7 @@ export function TestimonialCarouselClient({ reviews }: { reviews: TestimonialCar
     if (activeCategory === "bedding") return item.service.toLowerCase().includes("bedding") || item.service.toLowerCase().includes("duvet");
     if (activeCategory === "ironing") return item.service.toLowerCase().includes("iron") || item.service.toLowerCase().includes("press");
     if (activeCategory === "corporate") return item.service.toLowerCase().includes("corporate") || item.service.toLowerCase().includes("linen");
-    if (activeCategory === "premium") return item.service.toLowerCase().includes("premium");
+    if (activeCategory === "laundry") return item.service.toLowerCase().includes("laundry") || item.service.toLowerCase().includes("wash");
     return true;
   });
 

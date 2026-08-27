@@ -101,7 +101,7 @@ export default function HowItWorksPage() {
             Ready to experience effortless laundry?
           </h3>
           <p className="mt-2 text-sm text-white/80">
-            Book your doorstep pickup now and let our master cleaners handle the rest.
+            Book your doorstep pickup now and let our team handle the rest.
           </p>
           <div className="mt-6 flex justify-center">
             <Link

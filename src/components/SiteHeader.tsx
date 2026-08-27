@@ -26,7 +26,7 @@ export function SiteHeader() {
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1.5 font-medium text-[#ffe823] whitespace-nowrap">
               <Sparkles className="size-3.5 shrink-0" />
-              Nairobi&apos;s Premium Laundry & Dry Cleaning
+              Nairobi&apos;s Doorstep Laundry & House Care
             </span>
             <span className="hidden sm:inline text-white/40">|</span>
             <span className="hidden items-center gap-1.5 sm:flex text-white/80 whitespace-nowrap">

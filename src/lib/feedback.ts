@@ -67,7 +67,7 @@ function getDefaultInitialFeedback(): FeedbackItem[] {
       locationArea: "Karen",
       rating: 5,
       serviceType: "Wash & Fold Bulk",
-      reviewText: "Fast pickup in Karen, crisp ironing, and transparent rates. Highly recommended laundry studio in Nairobi.",
+      reviewText: "Fast pickup in Karen, crisp ironing, and transparent rates. Highly recommended doorstep laundry in Nairobi.",
       approved: true,
       createdAt: new Date(Date.now() - 259200000).toISOString(),
     },

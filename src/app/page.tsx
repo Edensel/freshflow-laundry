@@ -1,31 +1,29 @@
-import Image from "next/image";
 import Link from "next/link";
+import Image from "next/image";
 import {
   ArrowRight,
-  Building2,
   CalendarCheck2,
   CheckCircle2,
-  Clock3,
+  Clock,
+  CreditCard,
   Globe,
-  Leaf,
   MapPin,
+  MessageSquare,
+  Phone,
   Search,
   ShieldCheck,
   Sparkles,
-  Star,
   Truck,
   Wand2,
 } from "lucide-react";
-import { FaqSection } from "@/components/FaqSection";
-import { FloatingQuickActions } from "@/components/FloatingQuickActions";
+
 import { GarmentTransformation } from "@/components/GarmentTransformation";
-import { HeroExpressBar } from "@/components/HeroExpressBar";
-import { QuickTrackWidget } from "@/components/QuickTrackWidget";
 import { ServiceAreaChecker } from "@/components/ServiceAreaChecker";
-import { TestimonialSlider } from "@/components/TestimonialSlider";
-import { formatKes, serviceAreas } from "@/lib/business";
+import { HeroExpressBar } from "@/components/HeroExpressBar";
+import { FloatingQuickActions } from "@/components/FloatingQuickActions";
 import { getPublicMetrics } from "@/lib/orders";
-import { serviceCatalog, serviceCategories } from "@/lib/pricing";
+import { serviceAreas } from "@/lib/business";
+import { serviceCategories } from "@/lib/pricing";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -38,11 +36,11 @@ export default async function Home() {
       {/* FLOATING ACTION BAR */}
       <FloatingQuickActions />
 
-      {/* HERO SECTION - SENIOR ARCHITECT SIGNATURE STAGE */}
+      {/* HERO SECTION */}
       <section className="relative isolate overflow-hidden bg-[#092341] text-white">
         <Image
           src="/images/original-site/hero-01.jpg"
-          alt="Fresh Flow Masterpiece Garment Care Studio"
+          alt="Fresh Flow Doorstep Laundry & House Care"
           fill
           priority
           sizes="100vw"
@@ -56,21 +54,21 @@ export default async function Home() {
 
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8 lg:py-28">
           <div className="mx-auto max-w-4xl text-center">
-            {/* Live International Badge */}
+            {/* Doorstep Pickup & Delivery Eyebrow */}
             <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-[#ffe823] backdrop-blur-md shadow-lg">
               <Globe className="size-4 text-[#38BDF8]" aria-hidden="true" />
-              <span>World-Class Garment & Cleaning Standard • Nairobi, Kenya</span>
+              <span>Doorstep Pickup & Delivery • Nairobi, Kenya</span>
             </div>
 
             <h1 className="mt-6 text-4xl font-black tracking-tight sm:text-6xl lg:text-7xl leading-tight">
-              Flawless Garment & House Care <br className="hidden sm:inline" />
+              One Less Thing to Worry About <br className="hidden sm:inline" />
               <span className="bg-gradient-to-r from-[#ffe823] via-[#38BDF8] to-[#93C5FD] bg-clip-text text-transparent">
-                Doorstep Pickup & Delivery
+                Real Care, Right at Your Door
               </span>
             </h1>
 
             <p className="mt-6 text-lg leading-relaxed text-white/85 sm:text-xl max-w-3xl mx-auto font-normal">
-              Experience fast, eco-friendly wash & fold, Italian suit dry cleaning, deep house cleaning, plush carpet shampooing, and pest control — collected from your door across Nairobi.
+              From wash & fold to Italian suit dry cleaning, deep house cleaning, carpet shampooing, and pest control — we come to you, and we do it properly.
             </p>
 
             {/* HERO EXPRESS QUICK SELECTOR BAR */}
@@ -101,68 +99,53 @@ export default async function Home() {
               </Link>
             </div>
 
-            {/* Animated Social Proof Ticker */}
-            <div className="mt-12 grid grid-cols-2 gap-4 border-t border-white/15 pt-8 text-left sm:grid-cols-4">
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-xs">
-                <div className="flex items-center gap-1 text-[#ffe823]">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star key={i} className="size-4 fill-current" />
-                  ))}
-                </div>
-                <p className="mt-1 text-2xl font-black text-white">4.9 / 5.0</p>
-                <p className="text-xs text-white/70">Nairobi Customer Rating</p>
+            {/* Operational Stats Grid */}
+            <div className="mt-12 grid grid-cols-2 gap-4 border-t border-white/15 pt-8 sm:grid-cols-4">
+              <div>
+                <span className="block text-2xl font-black text-[#ffe823]">
+                  {metrics.completed30Days > 0 ? `${metrics.completed30Days}+` : "2,400+"}
+                </span>
+                <span className="text-xs text-white/70">Tickets Handled</span>
               </div>
 
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-xs">
-                <div className="flex items-center gap-1.5 text-[#38BDF8]">
-                  <Clock3 className="size-4" />
-                  <span className="text-xs font-bold uppercase">Speed</span>
-                </div>
-                <p className="mt-1 text-2xl font-black text-white">24 Hours</p>
-                <p className="text-xs text-white/70">Express Delivery</p>
+              <div>
+                <span className="block text-2xl font-black text-[#38BDF8]">24 Hours</span>
+                <span className="text-xs text-white/70">Standard Delivery</span>
               </div>
 
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-xs">
-                <div className="flex items-center gap-1.5 text-[#4ADE80]">
-                  <Leaf className="size-4" />
-                  <span className="text-xs font-bold uppercase">Eco Wash</span>
-                </div>
-                <p className="mt-1 text-2xl font-black text-white">100% Safe</p>
-                <p className="text-xs text-white/70">Fiber Detergents</p>
+              <div>
+                <span className="block text-2xl font-black text-white">4.9 / 5.0</span>
+                <span className="text-xs text-white/70">Average Rating</span>
               </div>
 
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-xs">
-                <div className="flex items-center gap-1.5 text-[#F472B6]">
-                  <Truck className="size-4" />
-                  <span className="text-xs font-bold uppercase">Free Route</span>
-                </div>
-                <p className="mt-1 text-2xl font-black text-white">KSh 0</p>
-                <p className="text-xs text-white/70">Pickup over KSh 2,500</p>
+              <div>
+                <span className="block text-2xl font-black text-[#ffe823]">M-Pesa</span>
+                <span className="text-xs text-white/70">Instant Receipts</span>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* GARMENT BEFORE & AFTER TRANSFORMATION SHOWCASE */}
-      <section className="py-16 lg:py-24">
+      {/* BEFORE & AFTER SHOWCASE */}
+      <section className="bg-[#f8fafc] py-16 lg:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <GarmentTransformation />
         </div>
       </section>
 
-      {/* FEATURED 4-CATEGORY SERVICE SHOWCASE SUITE */}
+      {/* 4-CATEGORY SERVICE SHOWCASE */}
       <section className="bg-white py-16 lg:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
             <span className="text-xs font-extrabold uppercase tracking-wider text-[#1363DF]">
-              Complete Service Portfolio
+              What We Do
             </span>
             <h2 className="mt-2 text-3xl font-black text-[#092341] sm:text-5xl tracking-tight">
-              Integrated Garment & Home Care Divisions
+              Doorstep Laundry, House Cleaning & Pest Control
             </h2>
             <p className="mt-4 text-base leading-relaxed text-[#64748b]">
-              From everyday laundry and suit dry cleaning to deep house sanitization, carpet stain extraction, and pest fumigation across Nairobi.
+              From everyday laundry and suit dry cleaning to deep house cleaning, carpet stain removal, and pest control across Nairobi.
             </p>
           </div>
 
@@ -182,7 +165,7 @@ export default async function Home() {
                   <p className="mt-2 text-xs leading-relaxed text-[#64748b]">
                     {cat.id === "laundry" && "Wash & fold, steam ironing, duvets, and suit dry cleaning."}
                     {cat.id === "house_cleaning" && "Bedseater to 3-bedroom deep home scrubbing & floor sanitization."}
-                    {cat.id === "carpet_cleaning" && "Deep shampoo extraction & odor control for rugs and wall-to-wall carpets."}
+                    {cat.id === "carpet_cleaning" && "Deep shampoo extraction & odor control for rugs and carpets."}
                     {cat.id === "fumigation" && "Targeted pest control treatment with 60-day protection guarantee."}
                   </p>
                 </div>
@@ -230,18 +213,18 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* WHY NAIROBI LOVES US / BRAND HIGHLIGHTS */}
+      {/* WHY NAIROBI CHOOSES US */}
       <section className="bg-[#f8fafc] py-16 lg:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto">
             <span className="text-xs font-bold uppercase tracking-wider text-[#1363DF]">
-              The International Garment Standard
+              Doorstep Care Across Nairobi
             </span>
             <h2 className="mt-2 text-3xl font-black text-[#092341] sm:text-4xl">
               Why Nairobi Chooses Fresh Flow
             </h2>
             <p className="mt-3 text-base text-[#64748b]">
-              Combining high-capacity modern washing tech, eco-friendly gentle detergents, doorstep convenience, and full ticket tracking transparency.
+              Combining modern washing tech, eco-friendly gentle detergents, doorstep convenience, and full ticket tracking transparency.
             </p>
           </div>
 
@@ -263,7 +246,7 @@ export default async function Home() {
                 <Sparkles className="size-6" />
               </div>
               <h3 className="mt-5 text-xl font-bold text-[#092341]">
-                Master Stain & Fiber Care
+                Careful Stain & Fiber Treatment
               </h3>
               <p className="mt-2 text-sm leading-relaxed text-[#64748b]">
                 Specialized treatments for suits, silks, whites, and woolens using non-allergenic, fiber-safe washing agents.
@@ -359,7 +342,7 @@ export default async function Home() {
                     desc: "Item tags assigned & weighed at your doorstep.",
                   },
                   {
-                    title: "3. Master Wash & Press",
+                    title: "3. Careful Wash & Press",
                     desc: "Garments processed with real-time status log.",
                   },
                   {
@@ -378,24 +361,31 @@ export default async function Home() {
               </div>
             </div>
 
-            <div className="lg:col-span-6">
-              <QuickTrackWidget />
+            {/* Quick Track Input box */}
+            <div className="lg:col-span-6 rounded-3xl border border-white/20 bg-white/10 p-6 backdrop-blur-md sm:p-8">
+              <h3 className="text-xl font-bold text-white">Track Your Order Status Live</h3>
+              <p className="mt-1 text-xs text-white/70">
+                Enter your Ticket ID (e.g. FFL-KE-2026-0084) or phone number to check current order progress.
+              </p>
+
+              <form action="/track" method="GET" className="mt-6 flex flex-col gap-3 sm:flex-row">
+                <input
+                  type="text"
+                  name="query"
+                  placeholder="e.g. FFL-KE-2026-0084 or 0712345678"
+                  className="flex-1 rounded-xl border border-white/30 bg-black/30 px-4 py-3 text-sm text-white placeholder-white/50 outline-none focus:border-[#38BDF8]"
+                  required
+                />
+                <button
+                  type="submit"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#1363DF] px-6 py-3 text-sm font-bold text-white transition hover:bg-[#0F4C81]"
+                >
+                  <Search className="size-4" />
+                  <span>Check Ticket</span>
+                </button>
+              </form>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* CUSTOMER SOCIAL PROOF & TESTIMONIAL SLIDER */}
-      <section className="py-16 lg:py-24">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <TestimonialSlider />
-        </div>
-      </section>
-
-      {/* FAQ SECTION */}
-      <section className="bg-white py-16 lg:py-24">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <FaqSection />
         </div>
       </section>
     </main>
