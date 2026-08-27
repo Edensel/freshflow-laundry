@@ -20,13 +20,12 @@ import { FaqSection } from "@/components/FaqSection";
 import { FloatingQuickActions } from "@/components/FloatingQuickActions";
 import { GarmentTransformation } from "@/components/GarmentTransformation";
 import { HeroExpressBar } from "@/components/HeroExpressBar";
-import { InteractiveEstimator } from "@/components/InteractiveEstimator";
 import { QuickTrackWidget } from "@/components/QuickTrackWidget";
 import { ServiceAreaChecker } from "@/components/ServiceAreaChecker";
 import { TestimonialSlider } from "@/components/TestimonialSlider";
 import { formatKes, serviceAreas } from "@/lib/business";
 import { getPublicMetrics } from "@/lib/orders";
-import { serviceCatalog } from "@/lib/pricing";
+import { serviceCatalog, serviceCategories } from "@/lib/pricing";
 
 export const dynamic = "force-dynamic";
 
@@ -59,18 +58,18 @@ export default async function Home() {
             {/* Live International Badge */}
             <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-[#ffe823] backdrop-blur-md shadow-lg">
               <Globe className="size-4 text-[#38BDF8]" aria-hidden="true" />
-              <span>World-Class Garment Care Standard • Nairobi, Kenya</span>
+              <span>World-Class Garment & Cleaning Standard • Nairobi, Kenya</span>
             </div>
 
             <h1 className="mt-6 text-4xl font-black tracking-tight sm:text-6xl lg:text-7xl leading-tight">
-              Flawless Garment Care <br className="hidden sm:inline" />
+              Flawless Garment & House Care <br className="hidden sm:inline" />
               <span className="bg-gradient-to-r from-[#ffe823] via-[#38BDF8] to-[#93C5FD] bg-clip-text text-transparent">
                 Doorstep Pickup & Delivery
               </span>
             </h1>
 
             <p className="mt-6 text-lg leading-relaxed text-white/85 sm:text-xl max-w-3xl mx-auto font-normal">
-              Experience fast, eco-friendly wash & fold, Italian suit dry cleaning, plush duvet care, and steam pressing — collected from your door in Nairobi and delivered back fresh within 24 hours.
+              Experience fast, eco-friendly wash & fold, Italian suit dry cleaning, deep house cleaning, plush carpet shampooing, and pest control — collected from your door across Nairobi.
             </p>
 
             {/* HERO EXPRESS QUICK SELECTOR BAR */}
@@ -85,13 +84,13 @@ export default async function Home() {
                 <CalendarCheck2 className="size-5" aria-hidden="true" />
                 <span>Full Booking Form</span>
               </Link>
-              <a
-                href="#estimator"
+              <Link
+                href="/calculator"
                 className="inline-flex min-h-14 items-center gap-3 rounded-2xl border border-white/30 bg-white/10 px-7 text-base font-bold text-white backdrop-blur-md transition-all hover:bg-white/20 hover:scale-[1.03]"
               >
                 <Sparkles className="size-5 text-[#ffe823]" aria-hidden="true" />
-                <span>Estimate Price</span>
-              </a>
+                <span>Rate Calculator</span>
+              </Link>
               <Link
                 href="/track"
                 className="inline-flex min-h-14 items-center gap-2 rounded-2xl border border-white/20 bg-black/20 px-6 text-base font-semibold text-white/90 backdrop-blur-md transition-all hover:bg-white/10 hover:text-white"
@@ -151,8 +150,87 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* WHY NAIROBI LOVES US / BRAND HIGHLIGHTS */}
+      {/* FEATURED 4-CATEGORY SERVICE SHOWCASE SUITE */}
       <section className="bg-white py-16 lg:py-24">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-3xl text-center">
+            <span className="text-xs font-extrabold uppercase tracking-wider text-[#1363DF]">
+              Complete Service Portfolio
+            </span>
+            <h2 className="mt-2 text-3xl font-black text-[#092341] sm:text-5xl tracking-tight">
+              4 Core Service Divisions
+            </h2>
+            <p className="mt-4 text-base leading-relaxed text-[#64748b]">
+              From everyday laundry and suit dry cleaning to deep house sanitization, carpet stain extraction, and pest fumigation across Nairobi.
+            </p>
+          </div>
+
+          <div className="mt-14 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            {serviceCategories.map((cat) => (
+              <div
+                key={cat.id}
+                className="group flex flex-col justify-between rounded-3xl border border-[#e2e8f0] bg-[#f8fafc] p-6 transition-all duration-300 hover:border-[#1363DF] hover:bg-white hover:shadow-xl"
+              >
+                <div>
+                  <div className="flex size-14 items-center justify-center rounded-2xl bg-[#092341] text-2xl shadow-md transition-transform group-hover:scale-110">
+                    {cat.icon}
+                  </div>
+                  <h3 className="mt-6 text-xl font-extrabold text-[#092341] group-hover:text-[#1363DF] transition">
+                    {cat.name}
+                  </h3>
+                  <p className="mt-2 text-xs leading-relaxed text-[#64748b]">
+                    {cat.id === "laundry" && "Wash & fold, steam ironing, duvets, and suit dry cleaning."}
+                    {cat.id === "house_cleaning" && "Bedseater to 3-bedroom deep home scrubbing & floor sanitization."}
+                    {cat.id === "carpet_cleaning" && "Deep shampoo extraction & odor control for rugs and wall-to-wall carpets."}
+                    {cat.id === "fumigation" && "Targeted pest control treatment with 60-day protection guarantee."}
+                  </p>
+                </div>
+
+                <div className="mt-8 border-t border-[#e2e8f0] pt-4">
+                  <Link
+                    href={`/services#${cat.id}`}
+                    className="inline-flex items-center gap-2 text-xs font-extrabold text-[#1363DF] group-hover:underline"
+                  >
+                    <span>Explore Rates</span>
+                    <ArrowRight className="size-4" />
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Interactive Calculator Banner Callout */}
+          <div className="mt-12 rounded-3xl bg-gradient-to-r from-[#092341] to-[#1363DF] p-8 text-white shadow-2xl lg:p-10">
+            <div className="grid gap-6 lg:grid-cols-12 lg:items-center">
+              <div className="lg:col-span-8">
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-[#ffe823]">
+                  <Sparkles className="size-4" />
+                  <span>Real-Time Quote Builder</span>
+                </div>
+                <h3 className="mt-3 text-2xl font-black sm:text-3xl">
+                  Want to estimate your custom order price?
+                </h3>
+                <p className="mt-2 text-xs text-white/80 leading-relaxed max-w-2xl">
+                  Use our interactive calculator tool to get an instant cost breakdown in KSh or USD ($) with free delivery threshold metering.
+                </p>
+              </div>
+
+              <div className="lg:col-span-4 text-left lg:text-right">
+                <Link
+                  href="/calculator"
+                  className="inline-flex items-center gap-2.5 rounded-2xl bg-[#ffe823] px-7 py-4 text-sm font-extrabold text-[#092341] transition-all hover:bg-[#fff17a] hover:scale-[1.03] active:scale-[0.98] shadow-xl"
+                >
+                  <span>Open Rate Calculator</span>
+                  <ArrowRight className="size-4" />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* WHY NAIROBI LOVES US / BRAND HIGHLIGHTS */}
+      <section className="bg-[#f8fafc] py-16 lg:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto">
             <span className="text-xs font-bold uppercase tracking-wider text-[#1363DF]">
@@ -167,7 +245,7 @@ export default async function Home() {
           </div>
 
           <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-3xl border border-[#e2e8f0] bg-[#F0F7FF]/50 p-6 transition-all hover:border-[#1363DF] hover:shadow-xl">
+            <div className="rounded-3xl border border-[#e2e8f0] bg-white p-6 transition-all hover:border-[#1363DF] hover:shadow-xl">
               <div className="flex size-12 items-center justify-center rounded-2xl bg-[#1363DF] text-white shadow-md shadow-[#1363DF]/30">
                 <Truck className="size-6" />
               </div>
@@ -179,7 +257,7 @@ export default async function Home() {
               </p>
             </div>
 
-            <div className="rounded-3xl border border-[#e2e8f0] bg-[#F0F7FF]/50 p-6 transition-all hover:border-[#1363DF] hover:shadow-xl">
+            <div className="rounded-3xl border border-[#e2e8f0] bg-white p-6 transition-all hover:border-[#1363DF] hover:shadow-xl">
               <div className="flex size-12 items-center justify-center rounded-2xl bg-[#1363DF] text-white shadow-md shadow-[#1363DF]/30">
                 <Sparkles className="size-6" />
               </div>
@@ -191,7 +269,7 @@ export default async function Home() {
               </p>
             </div>
 
-            <div className="rounded-3xl border border-[#e2e8f0] bg-[#F0F7FF]/50 p-6 transition-all hover:border-[#1363DF] hover:shadow-xl">
+            <div className="rounded-3xl border border-[#e2e8f0] bg-white p-6 transition-all hover:border-[#1363DF] hover:shadow-xl">
               <div className="flex size-12 items-center justify-center rounded-2xl bg-[#1363DF] text-white shadow-md shadow-[#1363DF]/30">
                 <ShieldCheck className="size-6" />
               </div>
@@ -203,7 +281,7 @@ export default async function Home() {
               </p>
             </div>
 
-            <div className="rounded-3xl border border-[#e2e8f0] bg-[#F0F7FF]/50 p-6 transition-all hover:border-[#1363DF] hover:shadow-xl">
+            <div className="rounded-3xl border border-[#e2e8f0] bg-white p-6 transition-all hover:border-[#1363DF] hover:shadow-xl">
               <div className="flex size-12 items-center justify-center rounded-2xl bg-[#1363DF] text-white shadow-md shadow-[#1363DF]/30">
                 <CalendarCheck2 className="size-6" />
               </div>
@@ -213,99 +291,6 @@ export default async function Home() {
               <p className="mt-2 text-sm leading-relaxed text-[#64748b]">
                 Clear KSh prices with zero hidden fees. Pay seamlessly via M-Pesa Buy Goods/Paybill or cash upon delivery.
               </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* INTERACTIVE LIVE PRICE CALCULATOR & ESTIMATOR */}
-      <section id="estimator" className="bg-[#f8fafc] py-16 lg:py-24">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid gap-12 lg:grid-cols-12 lg:items-start">
-            {/* Left Col: Rate Guarantees & Commercial Card */}
-            <div className="lg:col-span-5 flex flex-col justify-between h-full space-y-6">
-              <div>
-                <div className="inline-flex items-center gap-2 rounded-full bg-[#1363DF]/10 px-3.5 py-1 text-xs font-extrabold uppercase tracking-wider text-[#1363DF]">
-                  <Sparkles className="size-4" />
-                  <span>Guaranteed Rates</span>
-                </div>
-                <h2 className="mt-3 text-3xl font-black text-[#092341] sm:text-4xl leading-tight">
-                  Transparent Pricing, Zero Hidden Surcharges
-                </h2>
-                <p className="mt-3 text-sm leading-relaxed text-[#64748b]">
-                  Calculate your exact service quote in real-time. Transparent per-kg, per-item, and flat room rates across Nairobi.
-                </p>
-
-                {/* Compact Rate Guarantees List */}
-                <div className="mt-6 space-y-3">
-                  {[
-                    {
-                      title: "Standardized KSh & USD Rates",
-                      desc: "Fixed pricing with clear minimum order thresholds.",
-                      icon: ShieldCheck,
-                    },
-                    {
-                      title: "Free Doorstep Route over KSh 2,500",
-                      desc: "Zero delivery fees on orders meeting minimum threshold.",
-                      icon: Truck,
-                    },
-                    {
-                      title: "Digital Ticket & Receipt",
-                      desc: "Instant M-Pesa receipt sent to your email.",
-                      icon: CheckCircle2,
-                    },
-                  ].map((item) => {
-                    const Icon = item.icon;
-                    return (
-                      <div
-                        key={item.title}
-                        className="flex items-start gap-3 rounded-2xl border border-[#e2e8f0] bg-white p-3.5 shadow-xs transition hover:border-[#cbd5e1]"
-                      >
-                        <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-[#F0F7FF] text-[#1363DF]">
-                          <Icon className="size-4" />
-                        </div>
-                        <div>
-                          <h4 className="text-xs font-extrabold text-[#092341]">{item.title}</h4>
-                          <p className="mt-0.5 text-[11px] text-[#64748b]">{item.desc}</p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                <div className="mt-6">
-                  <Link
-                    href="/services"
-                    className="inline-flex items-center gap-2 text-xs font-extrabold text-[#1363DF] hover:underline"
-                  >
-                    <span>View Complete 18-Service Price List</span>
-                    <ArrowRight className="size-4" />
-                  </Link>
-                </div>
-              </div>
-
-              {/* B2B Commercial Banner */}
-              <div className="rounded-3xl bg-[#092341] p-6 text-white shadow-xl">
-                <div className="flex items-center gap-3">
-                  <Building2 className="size-6 text-[#38BDF8]" />
-                  <h4 className="font-extrabold text-base">Commercial & Embassy Contracts</h4>
-                </div>
-                <p className="mt-2 text-xs text-white/80 leading-relaxed">
-                  Weekly linen, towel, uniform dry cleaning, and facility pest control for Nairobi hotels, offices, spas & embassies.
-                </p>
-                <Link
-                  href="/contact"
-                  className="mt-4 inline-flex items-center gap-2 text-xs font-bold text-[#ffe823] hover:underline"
-                >
-                  <span>Request Corporate Rate Card</span>
-                  <ArrowRight className="size-3.5" />
-                </Link>
-              </div>
-            </div>
-
-            {/* Right Col: Interactive Calculator */}
-            <div className="lg:col-span-7">
-              <InteractiveEstimator />
             </div>
           </div>
         </div>
