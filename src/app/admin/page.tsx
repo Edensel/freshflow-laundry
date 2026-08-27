@@ -2,57 +2,36 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { redirect } from "next/navigation";
 import {
-  Building2,
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
-  Clock,
-  Filter,
   Lock,
   LogOut,
   Mail,
-  MapPin,
-  MessageSquare,
   MessageSquareCheck,
   Package,
-  Phone,
-  Search,
-  Send,
   ShieldCheck,
   Sparkles,
   Star,
   Trash2,
-  Truck,
-  User,
-  Store,
   TrendingUp,
 } from "lucide-react";
+import { AdminTicketQueue } from "@/components/AdminTicketQueue";
 import { FinancialAnalytics } from "@/components/FinancialAnalytics";
-import { StatusBadge } from "@/components/StatusBadge";
 import { WalkInOrderModal } from "@/components/WalkInOrderModal";
 import {
   adminPasswordHint,
   isAdminAuthenticated,
   isAdminConfigured,
 } from "@/lib/admin-auth";
-import {
-  businessConfig,
-  formatKes,
-  statusLabels,
-  statusSteps,
-} from "@/lib/business";
+import { businessConfig } from "@/lib/business";
 import { listAllFeedback } from "@/lib/feedback";
-import {
-  getPublicMetrics,
-  listRecentOrders,
-  type OrderStatus,
-} from "@/lib/orders";
+import { getPublicMetrics, listRecentOrders } from "@/lib/orders";
 import {
   approveFeedbackAction,
   deleteFeedbackAction,
   loginAction,
   logoutAction,
-  updateStatusAction,
 } from "./actions";
 
 export const metadata: Metadata = {
@@ -64,7 +43,6 @@ type AdminPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
-const TICKETS_PER_PAGE = 5;
 const REVIEWS_PER_PAGE = 5;
 
 function first(value: string | string[] | undefined) {
@@ -166,14 +144,8 @@ function LoginPanel({ error }: { error?: string }) {
 
 export default async function AdminPage({ searchParams }: AdminPageProps) {
   const params = await searchParams;
-  const statusParam = first(params.status);
   const activeTab = first(params.tab) || "tickets";
-  const searchQuery = first(params.search) || "";
-  const pageParam = Math.max(1, Number(first(params.page) || "1"));
   const reviewPageParam = Math.max(1, Number(first(params.reviewPage) || "1"));
-  const status = statusSteps.includes(statusParam as OrderStatus)
-    ? (statusParam as OrderStatus)
-    : undefined;
 
   if (!isAdminConfigured()) {
     return (
@@ -196,33 +168,12 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
   }
 
   const [rawOrders, metrics, feedbackList] = await Promise.all([
-    listRecentOrders(status),
+    listRecentOrders(),
     getPublicMetrics(),
     listAllFeedback(),
   ]);
 
   const pendingFeedbackCount = feedbackList.filter((f) => !f.approved).length;
-
-  const filteredOrders = searchQuery.trim()
-    ? rawOrders.filter((o) => {
-        const queryLower = searchQuery.toLowerCase();
-        return (
-          o.ticketId.toLowerCase().includes(queryLower) ||
-          o.customerName.toLowerCase().includes(queryLower) ||
-          o.customerPhone.includes(queryLower) ||
-          o.customerEmail.toLowerCase().includes(queryLower) ||
-          o.serviceArea.toLowerCase().includes(queryLower)
-        );
-      })
-    : rawOrders;
-
-  // Ticket Queue Pagination
-  const totalTicketPages = Math.ceil(filteredOrders.length / TICKETS_PER_PAGE) || 1;
-  const currentTicketPage = Math.min(pageParam, totalTicketPages);
-  const paginatedOrders = filteredOrders.slice(
-    (currentTicketPage - 1) * TICKETS_PER_PAGE,
-    currentTicketPage * TICKETS_PER_PAGE
-  );
 
   // Reviews Pagination
   const totalReviewPages = Math.ceil(feedbackList.length / REVIEWS_PER_PAGE) || 1;
@@ -308,223 +259,10 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
           </div>
         </div>
 
-        {/* TAB 1: TICKET OPERATIONS QUEUE */}
+        {/* TAB 1: INSTANT REAL-TIME SEARCH TICKET OPERATIONS QUEUE */}
         {activeTab === "tickets" && (
           <section className="mt-6">
-            {/* Filter & Search Bar */}
-            <div className="rounded-2xl border border-[#e2e8f0] bg-white p-4 shadow-xs">
-              <form className="flex flex-wrap items-center gap-3">
-                <input type="hidden" name="tab" value="tickets" />
-                <div className="relative flex-1 min-w-[240px]">
-                  <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[#94a3b8]" />
-                  <input
-                    name="search"
-                    defaultValue={searchQuery}
-                    placeholder="Search Ticket ID, Customer Name, Phone, or Area..."
-                    className="w-full rounded-xl border border-[#cbd5e1] bg-[#f8fafc] py-2.5 pl-10 pr-4 text-xs font-medium text-[#092341] outline-none focus:border-[#1363DF] focus:bg-white"
-                  />
-                </div>
-
-                <select
-                  name="status"
-                  defaultValue={status || ""}
-                  className="rounded-xl border border-[#cbd5e1] bg-[#f8fafc] px-3.5 py-2.5 text-xs font-bold text-[#092341] outline-none focus:border-[#1363DF]"
-                >
-                  <option value="">All Statuses</option>
-                  {statusSteps.map((item) => (
-                    <option key={item} value={item}>
-                      {statusLabels[item]}
-                    </option>
-                  ))}
-                </select>
-
-                <button
-                  type="submit"
-                  className="inline-flex items-center gap-2 rounded-xl bg-[#092341] px-5 py-2.5 text-xs font-bold text-white transition hover:bg-[#1363DF]"
-                >
-                  <Filter className="size-3.5" />
-                  <span>Apply Filter</span>
-                </button>
-              </form>
-            </div>
-
-            {/* Paginated Orders List */}
-            <div className="mt-5 space-y-4">
-              {paginatedOrders.length > 0 ? (
-                paginatedOrders.map((order) => (
-                  <article
-                    key={order.id}
-                    className="rounded-3xl border border-[#e2e8f0] bg-white p-5 shadow-xs transition hover:border-[#cbd5e1]"
-                  >
-                    <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[#f1f5f9] pb-3">
-                      <div>
-                        <div className="flex flex-wrap items-center gap-3">
-                          <h2 className="text-xl font-black text-[#092341]">
-                            {order.ticketId}
-                          </h2>
-                          <StatusBadge status={order.status} />
-                          <span className="text-xs font-medium text-[#94a3b8]">
-                            Created: {formatDate(order.createdAt)}
-                          </span>
-                        </div>
-
-                        <div className="mt-2 flex flex-wrap gap-4 text-xs text-[#475569]">
-                          <span className="flex items-center gap-1.5 font-bold text-[#092341]">
-                            <User className="size-3.5 text-[#1363DF]" />
-                            {order.customerName}
-                          </span>
-                          <span className="flex items-center gap-1.5">
-                            <Phone className="size-3.5 text-[#1363DF]" />
-                            {order.customerPhone}
-                          </span>
-                          <span className="flex items-center gap-1.5">
-                            <Mail className="size-3.5 text-[#1363DF]" />
-                            {order.customerEmail}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="text-right">
-                        <span className="text-[10px] font-bold uppercase text-[#94a3b8]">
-                          Total Amount
-                        </span>
-                        <p className="text-xl font-black text-[#1363DF]">
-                          {formatKes(order.priceTotalKe)}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="mt-4 grid gap-4 lg:grid-cols-12">
-                      {/* Client & Address Info */}
-                      <div className="space-y-2 rounded-2xl border border-[#e2e8f0] bg-[#f8fafc] p-3.5 text-xs lg:col-span-6">
-                        <div>
-                          <span className="font-bold text-[#94a3b8] uppercase text-[10px]">
-                            Service Location / Channel
-                          </span>
-                          <p className="mt-0.5 font-bold text-[#092341]">
-                            📍 {order.serviceArea} — {order.address}
-                          </p>
-                        </div>
-
-                        <div className="grid gap-2 sm:grid-cols-2 pt-2 border-t border-[#e2e8f0]">
-                          <div>
-                            <span className="text-[#94a3b8] text-[10px] font-bold uppercase">Service / Pickup Date</span>
-                            <p className="font-medium text-[#092341]">{formatDate(order.pickupDatetime)}</p>
-                          </div>
-                          <div>
-                            <span className="text-[#94a3b8] text-[10px] font-bold uppercase">Delivery / Completion</span>
-                            <p className="font-medium text-[#092341]">{formatDate(order.deliveryDatetime)}</p>
-                          </div>
-                        </div>
-
-                        <div className="pt-2 border-t border-[#e2e8f0]">
-                          <span className="text-[#94a3b8] text-[10px] font-bold uppercase">Itemized Booked Services</span>
-                          <ul className="mt-1 space-y-1 font-semibold text-[#092341]">
-                            {order.serviceDetails.lines.map((line) => (
-                              <li key={line.id}>
-                                • {line.name} × {line.quantity} {line.unit} ({formatKes(line.lineTotalKe)})
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-
-                        {order.specialInstructions ? (
-                          <div className="pt-2 border-t border-[#e2e8f0]">
-                            <span className="text-[#94a3b8] text-[10px] font-bold uppercase">Special Instructions</span>
-                            <p className="mt-0.5 text-[#334155] italic">{order.specialInstructions}</p>
-                          </div>
-                        ) : null}
-                      </div>
-
-                      {/* Owner Status Response Form */}
-                      <form
-                        action={updateStatusAction}
-                        className="space-y-3 rounded-2xl border border-[#bfdbfe] bg-[#F0F7FF] p-3.5 lg:col-span-6"
-                      >
-                        <input type="hidden" name="orderId" value={order.id} />
-                        <div>
-                          <label className="block text-xs font-bold uppercase text-[#092341]">
-                            Update Order Status
-                          </label>
-                          <select
-                            name="status"
-                            defaultValue={order.status}
-                            className="mt-1 min-h-10 w-full rounded-xl border border-[#cbd5e1] bg-white px-3 text-xs font-bold text-[#092341] outline-none focus:border-[#1363DF]"
-                          >
-                            {statusSteps.map((item) => (
-                              <option key={item} value={item}>
-                                {statusLabels[item]}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-bold uppercase text-[#092341]">
-                            Customer Progress Note
-                          </label>
-                          <textarea
-                            name="notes"
-                            rows={2}
-                            placeholder="e.g. Cleaning completed. Team finalized inspection..."
-                            className="mt-1 w-full rounded-xl border border-[#cbd5e1] bg-white p-2.5 text-xs text-[#092341] outline-none focus:border-[#1363DF]"
-                          />
-                        </div>
-
-                        <button
-                          type="submit"
-                          className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-xl bg-[#1363DF] px-4 text-xs font-extrabold text-white shadow-xs transition hover:bg-[#0F4C81]"
-                        >
-                          <Send className="size-4" />
-                          <span>Update Status & Send Receipt Email</span>
-                        </button>
-                      </form>
-                    </div>
-                  </article>
-                ))
-              ) : (
-                <div className="rounded-3xl border border-[#e2e8f0] bg-white p-10 text-center text-[#64748b]">
-                  <Package className="mx-auto size-10 text-[#cbd5e1]" />
-                  <p className="mt-3 text-base font-bold text-[#092341]">No orders matched those filters.</p>
-                </div>
-              )}
-
-              {/* Minimal Scroll Ticket Pagination Controls */}
-              {totalTicketPages > 1 && (
-                <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#cbd5e1] bg-white p-4 shadow-xs text-xs font-bold text-[#092341]">
-                  <span>
-                    Showing {((currentTicketPage - 1) * TICKETS_PER_PAGE) + 1}–
-                    {Math.min(currentTicketPage * TICKETS_PER_PAGE, filteredOrders.length)} of {filteredOrders.length} tickets
-                  </span>
-
-                  <div className="flex items-center gap-2">
-                    <a
-                      href={`/admin?tab=tickets&page=${currentTicketPage - 1}${searchQuery ? `&search=${searchQuery}` : ""}${status ? `&status=${status}` : ""}`}
-                      aria-disabled={currentTicketPage === 1}
-                      className={`inline-flex items-center gap-1 rounded-xl border border-[#cbd5e1] bg-[#f8fafc] px-3.5 py-1.5 transition ${
-                        currentTicketPage === 1 ? "opacity-30 pointer-events-none" : "hover:bg-white hover:border-[#1363DF]"
-                      }`}
-                    >
-                      <ChevronLeft className="size-4" />
-                      <span>Previous</span>
-                    </a>
-
-                    <span className="px-2">Page {currentTicketPage} of {totalTicketPages}</span>
-
-                    <a
-                      href={`/admin?tab=tickets&page=${currentTicketPage + 1}${searchQuery ? `&search=${searchQuery}` : ""}${status ? `&status=${status}` : ""}`}
-                      aria-disabled={currentTicketPage === totalTicketPages}
-                      className={`inline-flex items-center gap-1 rounded-xl border border-[#cbd5e1] bg-[#f8fafc] px-3.5 py-1.5 transition ${
-                        currentTicketPage === totalTicketPages ? "opacity-30 pointer-events-none" : "hover:bg-white hover:border-[#1363DF]"
-                      }`}
-                    >
-                      <span>Next</span>
-                      <ChevronRight className="size-4" />
-                    </a>
-                  </div>
-                </div>
-              )}
-            </div>
+            <AdminTicketQueue orders={rawOrders} />
           </section>
         )}
 
