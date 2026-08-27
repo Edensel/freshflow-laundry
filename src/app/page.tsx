@@ -36,35 +36,35 @@ export default async function Home() {
       {/* FLOATING ACTION BAR */}
       <FloatingQuickActions />
 
-      {/* HERO SECTION */}
+      {/* HERO SECTION - FLUID & PLAYFUL INDIGO CONCEPT */}
       <section className="relative isolate overflow-hidden bg-[#092341] text-white">
+        {/* Background Real Photography Layer with Contrast Gradient */}
         <Image
           src="/images/original-site/hero-01.jpg"
           alt="Fresh Flow Doorstep Laundry & House Care"
           fill
           priority
           sizes="100vw"
-          className="absolute inset-0 -z-10 object-cover object-center opacity-30 mix-blend-overlay"
+          className="absolute inset-0 -z-10 object-cover object-center opacity-25 mix-blend-overlay"
         />
         <div className="absolute inset-0 -z-10 bg-gradient-to-b from-[#092341]/95 via-[#092341]/85 to-[#092341]" />
 
-        {/* Ambient Glow Orbs */}
-        <div className="absolute left-1/2 top-1/4 -z-10 h-96 w-96 -translate-x-1/2 rounded-full bg-[#1363DF]/30 blur-3xl" />
-        <div className="absolute right-10 top-10 -z-10 h-64 w-64 rounded-full bg-[#38BDF8]/20 blur-3xl" />
+        {/* Fluid Water-Ripple Motion Background Orbs */}
+        <div className="absolute left-1/2 top-1/4 -z-10 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-radial from-[#1363DF]/25 via-[#38BDF8]/10 to-transparent blur-3xl animate-pulse duration-10000" />
+        <div className="absolute right-10 top-10 -z-10 h-72 w-72 rounded-full bg-radial from-[#ffe823]/15 to-transparent blur-3xl" />
 
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8 lg:py-28">
           <div className="mx-auto max-w-4xl text-center">
-            {/* Doorstep Pickup & Delivery Eyebrow */}
+            {/* Live Doorstep Eyebrow Badge */}
             <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-[#ffe823] backdrop-blur-md shadow-lg">
               <Globe className="size-4 text-[#38BDF8]" aria-hidden="true" />
               <span>Doorstep Pickup & Delivery • Nairobi, Kenya</span>
             </div>
 
+            {/* Headline H1 with Clean Line Wrapping & WCAG AA Accent */}
             <h1 className="mt-6 text-4xl font-black tracking-tight sm:text-6xl lg:text-7xl leading-tight">
-              One Less Thing to Worry About <br className="hidden sm:inline" />
-              <span className="bg-gradient-to-r from-[#ffe823] via-[#38BDF8] to-[#93C5FD] bg-clip-text text-transparent">
-                Real Care, Right at Your Door
-              </span>
+              <span className="block text-white">One Less Thing to Worry About</span>
+              <span className="mt-1 block text-[#ffe823]">Real Care, Right at Your Door</span>
             </h1>
 
             <p className="mt-6 text-lg leading-relaxed text-white/85 sm:text-xl max-w-3xl mx-auto font-normal">
@@ -74,52 +74,61 @@ export default async function Home() {
             {/* HERO EXPRESS QUICK SELECTOR BAR */}
             <HeroExpressBar />
 
-            {/* CTAs */}
+            {/* CTA Hierarchy */}
             <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+              {/* Primary CTA: Dominant Lemon Yellow */}
               <Link
                 href="/book"
-                className="inline-flex min-h-14 items-center gap-3 rounded-2xl bg-[#1363DF] px-8 text-base font-extrabold text-white shadow-xl shadow-[#1363DF]/40 transition-all hover:bg-[#0F4C81] hover:scale-[1.03] active:scale-[0.98]"
+                className="inline-flex min-h-14 items-center gap-3 rounded-2xl bg-[#ffe823] px-8 text-base font-black text-[#092341] shadow-xl shadow-[#ffe823]/25 transition-all hover:bg-[#fff17a] hover:scale-[1.03] active:scale-[0.98]"
               >
                 <CalendarCheck2 className="size-5" aria-hidden="true" />
-                <span>Full Booking Form</span>
+                <span>Book Pickup</span>
               </Link>
+
+              {/* Secondary CTAs: Muted Outlines */}
+              <Link
+                href="/book"
+                className="inline-flex min-h-14 items-center gap-2 rounded-2xl border border-white/30 bg-white/10 px-6 text-sm font-bold text-white backdrop-blur-md transition-all hover:bg-white/20 hover:scale-[1.02]"
+              >
+                <span>Customize My Order</span>
+              </Link>
+
               <Link
                 href="/calculator"
-                className="inline-flex min-h-14 items-center gap-3 rounded-2xl border border-white/30 bg-white/10 px-7 text-base font-bold text-white backdrop-blur-md transition-all hover:bg-white/20 hover:scale-[1.03]"
+                className="inline-flex min-h-14 items-center gap-2 rounded-2xl border border-white/20 bg-white/5 px-6 text-sm font-semibold text-white/90 backdrop-blur-md transition-all hover:bg-white/15"
               >
-                <Sparkles className="size-5 text-[#ffe823]" aria-hidden="true" />
+                <Sparkles className="size-4 text-[#ffe823]" aria-hidden="true" />
                 <span>Rate Calculator</span>
               </Link>
+
               <Link
                 href="/track"
-                className="inline-flex min-h-14 items-center gap-2 rounded-2xl border border-white/20 bg-black/20 px-6 text-base font-semibold text-white/90 backdrop-blur-md transition-all hover:bg-white/10 hover:text-white"
+                className="inline-flex min-h-14 items-center gap-2 rounded-2xl border border-white/20 bg-white/5 px-6 text-sm font-semibold text-white/90 backdrop-blur-md transition-all hover:bg-white/15"
               >
-                <Search className="size-5 text-[#38BDF8]" aria-hidden="true" />
+                <Search className="size-4 text-[#38BDF8]" aria-hidden="true" />
                 <span>Track Ticket</span>
               </Link>
             </div>
 
-            {/* Operational Stats Grid */}
+            {/* Fixed Stats Row */}
             <div className="mt-12 grid grid-cols-2 gap-4 border-t border-white/15 pt-8 sm:grid-cols-4">
               <div>
-                <span className="block text-2xl font-black text-[#ffe823]">
-                  {metrics.completed30Days > 0 ? `${metrics.completed30Days}+` : "2,400+"}
-                </span>
-                <span className="text-xs text-white/70">Tickets Handled</span>
+                <span className="block text-xl font-black text-[#ffe823]">100%</span>
+                <span className="text-xs text-white/70">Ticket Transparency</span>
               </div>
 
               <div>
-                <span className="block text-2xl font-black text-[#38BDF8]">24 Hours</span>
+                <span className="block text-xl font-black text-[#38BDF8]">24 Hours</span>
                 <span className="text-xs text-white/70">Standard Delivery</span>
               </div>
 
               <div>
-                <span className="block text-2xl font-black text-white">4.9 / 5.0</span>
+                <span className="block text-xl font-black text-white">4.9 / 5.0</span>
                 <span className="text-xs text-white/70">Average Rating</span>
               </div>
 
               <div>
-                <span className="block text-2xl font-black text-[#ffe823]">M-Pesa</span>
+                <span className="block text-xl font-black text-[#ffe823]">M-Pesa</span>
                 <span className="text-xs text-white/70">Instant Receipts</span>
               </div>
             </div>
@@ -145,7 +154,7 @@ export default async function Home() {
               Doorstep Laundry, House Cleaning & Pest Control
             </h2>
             <p className="mt-4 text-base leading-relaxed text-[#64748b]">
-              From everyday laundry and suit dry cleaning to deep house cleaning, carpet stain removal, and pest control across Nairobi.
+              Coffee stain drama? We&apos;ve seen worse. From everyday laundry and suit dry cleaning to deep house scrubbing and pest control across Nairobi.
             </p>
           </div>
 
@@ -213,7 +222,7 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* WHY NAIROBI CHOOSES US */}
+      {/* ASYMMETRIC BRAND HIGHLIGHTS SECTION */}
       <section className="bg-[#f8fafc] py-16 lg:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto">
@@ -228,8 +237,9 @@ export default async function Home() {
             </p>
           </div>
 
+          {/* Asymmetrical 2x2 Feature Cards */}
           <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-3xl border border-[#e2e8f0] bg-white p-6 transition-all hover:border-[#1363DF] hover:shadow-xl">
+            <div className="rounded-3xl border border-[#e2e8f0] bg-white p-6 transition-all hover:border-[#1363DF] hover:shadow-xl lg:translate-y-2">
               <div className="flex size-12 items-center justify-center rounded-2xl bg-[#1363DF] text-white shadow-md shadow-[#1363DF]/30">
                 <Truck className="size-6" />
               </div>
@@ -241,8 +251,8 @@ export default async function Home() {
               </p>
             </div>
 
-            <div className="rounded-3xl border border-[#e2e8f0] bg-white p-6 transition-all hover:border-[#1363DF] hover:shadow-xl">
-              <div className="flex size-12 items-center justify-center rounded-2xl bg-[#1363DF] text-white shadow-md shadow-[#1363DF]/30">
+            <div className="rounded-3xl border border-[#ffe823] bg-[#fffdf0] p-6 shadow-md transition-all hover:shadow-xl lg:-translate-y-2">
+              <div className="flex size-12 items-center justify-center rounded-2xl bg-[#092341] text-[#ffe823] shadow-md">
                 <Sparkles className="size-6" />
               </div>
               <h3 className="mt-5 text-xl font-bold text-[#092341]">
@@ -253,7 +263,7 @@ export default async function Home() {
               </p>
             </div>
 
-            <div className="rounded-3xl border border-[#e2e8f0] bg-white p-6 transition-all hover:border-[#1363DF] hover:shadow-xl">
+            <div className="rounded-3xl border border-[#e2e8f0] bg-white p-6 transition-all hover:border-[#1363DF] hover:shadow-xl lg:translate-y-2">
               <div className="flex size-12 items-center justify-center rounded-2xl bg-[#1363DF] text-white shadow-md shadow-[#1363DF]/30">
                 <ShieldCheck className="size-6" />
               </div>
@@ -265,7 +275,7 @@ export default async function Home() {
               </p>
             </div>
 
-            <div className="rounded-3xl border border-[#e2e8f0] bg-white p-6 transition-all hover:border-[#1363DF] hover:shadow-xl">
+            <div className="rounded-3xl border border-[#e2e8f0] bg-white p-6 transition-all hover:border-[#1363DF] hover:shadow-xl lg:-translate-y-2">
               <div className="flex size-12 items-center justify-center rounded-2xl bg-[#1363DF] text-white shadow-md shadow-[#1363DF]/30">
                 <CalendarCheck2 className="size-6" />
               </div>

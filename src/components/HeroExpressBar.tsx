@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Clock, MapPin, Sparkles } from "lucide-react";
+import { ArrowRight, Clock, MapPin, Sparkles, Tag } from "lucide-react";
 import { formatKes, serviceAreas } from "@/lib/business";
 import { serviceCatalog, ServiceId } from "@/lib/pricing";
 
@@ -22,7 +22,7 @@ export function HeroExpressBar() {
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#4ADE80] opacity-75" />
             <span className="relative inline-flex size-2.5 rounded-full bg-[#4ADE80]" />
           </span>
-          <span>Nairobi Express Route Drivers Active</span>
+          <span>Nairobi Express Pickup Drivers Active</span>
         </div>
         <div className="flex items-center gap-1.5 text-xs text-white/80 font-medium">
           <Clock className="size-3.5 text-[#38BDF8]" />
@@ -32,12 +32,12 @@ export function HeroExpressBar() {
 
       <form
         onSubmit={(e) => e.preventDefault()}
-        className="mt-4 grid gap-3 sm:grid-cols-12 items-center"
+        className="mt-4 grid gap-4 sm:grid-cols-12 items-center"
       >
-        {/* Neighborhood Select */}
+        {/* 1. Pickup Neighborhood */}
         <div className="sm:col-span-4">
-          <label className="block text-[10px] font-bold uppercase tracking-wider text-white/70">
-            1. Neighborhood
+          <label className="block text-[10px] font-bold uppercase tracking-wider text-white/80">
+            1. Pickup Neighborhood
           </label>
           <div className="relative mt-1">
             <select
@@ -47,18 +47,18 @@ export function HeroExpressBar() {
             >
               {serviceAreas.map((a) => (
                 <option key={a} value={a} className="bg-[#092341] text-white">
-                  📍 {a}
+                  {a}
                 </option>
               ))}
             </select>
-            <MapPin className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-white/50" />
+            <MapPin className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-white/60" />
           </div>
         </div>
 
-        {/* Service Select */}
+        {/* 2. Care Service */}
         <div className="sm:col-span-4">
-          <label className="block text-[10px] font-bold uppercase tracking-wider text-white/70">
-            2. Service Type
+          <label className="block text-[10px] font-bold uppercase tracking-wider text-white/80">
+            2. Care Service
           </label>
           <div className="relative mt-1">
             <select
@@ -68,19 +68,19 @@ export function HeroExpressBar() {
             >
               {serviceCatalog.map((s) => (
                 <option key={s.id} value={s.id} className="bg-[#092341] text-white">
-                  🧺 {s.name} ({(s.id as string) === "corporate" ? "Quote" : `${formatKes(s.priceKe)}/${s.unit}`})
+                  {s.name} ({(s.id as string) === "corporate" ? "Quote" : `${formatKes(s.priceKe)}/${s.unit}`})
                 </option>
               ))}
             </select>
-            <Sparkles className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-white/50" />
+            <Tag className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-white/60" />
           </div>
         </div>
 
-        {/* Quote & CTA */}
+        {/* 3. Quick Estimate & Booking */}
         <div className="sm:col-span-4 flex items-center gap-3">
-          <div className="flex-1 rounded-xl border border-white/15 bg-black/20 p-2.5 text-center">
+          <div className="flex-1 rounded-xl border border-white/15 bg-black/30 p-2 text-center">
             <span className="block text-[9px] font-bold uppercase tracking-wider text-white/60">
-              Est. Rate
+              3. Est. Rate
             </span>
             <span className="text-base font-black text-[#ffe823]">
               {isCorporate ? "Custom Quote" : formatKes(estimatePrice)}
