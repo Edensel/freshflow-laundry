@@ -176,12 +176,14 @@ export async function createBookingAction(
       }
     }
 
+    revalidatePath("/");
+    revalidatePath("/book");
     revalidatePath("/track");
     revalidatePath("/admin");
 
     return {
       ok: true,
-      message: "Your pickup is booked.",
+      message: "Your pickup is booked successfully.",
       confirmation: {
         ticketId: order.ticketId,
         totalKe: order.priceTotalKe,

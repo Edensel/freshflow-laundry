@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useMemo, useState, Suspense } from "react";
 import { useFormStatus } from "react-dom";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import {
   AlertCircle,
   ArrowLeft,
@@ -12,6 +13,7 @@ import {
   Loader2,
   MailCheck,
   MapPin,
+  Search,
   Shirt,
   UserRound,
   WalletCards,
@@ -280,39 +282,75 @@ function BookingFormInner({ compact = false }: { compact?: boolean }) {
     );
 
     return (
-      <section className="rounded-2xl border border-[#bbf7d0] bg-white p-6 shadow-xl lg:p-8 text-[#092341]">
-        <div className="flex items-start gap-4">
-          <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-[#f0fdf4] text-[#16a34a]">
-            <CheckCircle2 className="size-7" aria-hidden="true" />
+      <section className="rounded-3xl border border-[#bbf7d0] bg-white p-6 shadow-2xl lg:p-8 text-[#092341] animate-in fade-in zoom-in-95 duration-300">
+        <div className="flex items-start gap-4 border-b border-[#f1f5f9] pb-6">
+          <span className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-[#f0fdf4] text-[#16a34a] ring-8 ring-[#f0fdf4]/50">
+            <CheckCircle2 className="size-8" aria-hidden="true" />
           </span>
-          <div>
-            <p className="text-xs font-bold uppercase tracking-wider text-[#16a34a]">
-              Booking Confirmed
-            </p>
-            <h2 className="mt-1 text-2xl font-black text-[#092341]">
-              Ticket ID: {state.confirmation.ticketId}
+          <div className="flex-1">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <span className="rounded-full bg-[#f0fdf4] px-3 py-1 text-xs font-black uppercase tracking-wider text-[#16a34a]">
+                ⚡ Ticket Booked & Staff Notified
+              </span>
+              <span className="text-xs text-[#94a3b8]">Order Ref #{state.confirmation.ticketId}</span>
+            </div>
+            <h2 className="mt-2 text-2xl font-black text-[#092341]">
+              Ticket ID: <span className="text-[#1363DF]">{state.confirmation.ticketId}</span>
             </h2>
-            <p className="mt-2 text-xs text-[#64748b]">
-              Pickup/Date: <strong>{formatDate(state.confirmation.pickupDatetime)}</strong>
+            <p className="mt-1 text-xs font-semibold text-[#475569]">
+              Your service ticket has been created and dispatched to our Operations Team.
             </p>
-            <p className="text-xs text-[#64748b]">
-              Delivery/Completion: <strong>{formatDate(state.confirmation.deliveryDatetime)}</strong>
-            </p>
+            <div className="mt-3 grid gap-2 rounded-xl bg-[#f8fafc] p-3 text-xs md:grid-cols-2">
+              <div>
+                <span className="text-[10px] font-bold uppercase text-[#94a3b8]">Pickup Window</span>
+                <p className="font-bold text-[#092341]">{formatDate(state.confirmation.pickupDatetime)}</p>
+              </div>
+              <div>
+                <span className="text-[10px] font-bold uppercase text-[#94a3b8]">Estimated Delivery</span>
+                <p className="font-bold text-[#092341]">{formatDate(state.confirmation.deliveryDatetime)}</p>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="mt-6 rounded-xl border border-[#cbd5e1] bg-[#f8fafc] p-4">
-          <p className="text-sm font-bold text-[#092341]">
-            Estimated Total: {formatKes(state.confirmation.totalKe)}
-          </p>
-          <ul className="mt-3 space-y-2 text-xs text-[#475569]">
-            {instructions.map((instruction) => (
-              <li key={instruction} className="flex gap-2">
-                <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-[#1363DF]" />
-                <span>{instruction}</span>
-              </li>
-            ))}
-          </ul>
+        <div className="mt-6 space-y-4">
+          <div className="rounded-2xl border border-[#cbd5e1] bg-[#F0F7FF] p-4">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold uppercase text-[#092341]">Total Amount</span>
+              <p className="text-xl font-black text-[#1363DF]">
+                {formatKes(state.confirmation.totalKe)}
+              </p>
+            </div>
+            <ul className="mt-3 space-y-2 text-xs text-[#475569]">
+              {instructions.map((instruction) => (
+                <li key={instruction} className="flex gap-2">
+                  <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-[#1363DF]" />
+                  <span>{instruction}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <Link
+              href={`/track?query=${state.confirmation.ticketId}`}
+              className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-2xl bg-[#1363DF] px-6 text-sm font-extrabold text-white shadow-lg transition hover:bg-[#0F4C81]"
+            >
+              <Search className="size-4" />
+              <span>Track Your Ticket Live Now</span>
+            </Link>
+
+            <a
+              href={`https://wa.me/254789920270?text=${encodeURIComponent(
+                `Hello Fresh Flow, I just booked Ticket #${state.confirmation.ticketId}. Please assist me with my order.`
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-[#cbd5e1] bg-white px-5 text-sm font-bold text-[#092341] shadow-xs transition hover:bg-[#f8fafc]"
+            >
+              <span>WhatsApp Support</span>
+            </a>
+          </div>
         </div>
       </section>
     );

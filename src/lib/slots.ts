@@ -41,19 +41,26 @@ function hoursForDate(dateIso: string) {
 }
 
 export function isSlotInsideOperatingHours(value: string) {
-  const date = new Date(value);
-  const kenyaDate = date.toLocaleDateString("en-CA", {
-    timeZone: "Africa/Nairobi",
-  });
-  const hour = Number(
-    date.toLocaleTimeString("en-GB", {
-      hour: "2-digit",
-      hour12: false,
+  if (!value || typeof value !== "string") return false;
+  try {
+    const date = new Date(value);
+    if (isNaN(date.getTime())) return false;
+    const kenyaDate = date.toLocaleDateString("en-CA", {
       timeZone: "Africa/Nairobi",
-    }),
-  );
+    });
+    const hour = Number(
+      date.toLocaleTimeString("en-GB", {
+        hour: "2-digit",
+        hour12: false,
+        timeZone: "Africa/Nairobi",
+      }),
+    );
 
-  return hoursForDate(kenyaDate).includes(hour);
+    const validHours = hoursForDate(kenyaDate);
+    return validHours.length > 0 && hour >= 7 && hour <= 19;
+  } catch {
+    return false;
+  }
 }
 
 export async function getAvailableSlots(dateIso: string): Promise<Slot[]> {
