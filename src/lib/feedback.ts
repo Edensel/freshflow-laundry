@@ -28,14 +28,63 @@ type FeedbackRow = {
 
 const demoDataPath = path.join(process.cwd(), ".data", "demo-orders.json");
 
+function getDefaultInitialFeedback(): FeedbackItem[] {
+  const now = new Date().toISOString();
+  return [
+    {
+      id: 1,
+      customerName: "Grace Muthoni",
+      locationArea: "Westlands",
+      rating: 5,
+      serviceType: "Dry Cleaning & Suit Pressing",
+      reviewText: "Fresh Flow handled our executive suits and silk garments impeccably. Doorstep pickup in Westlands was right on time.",
+      approved: true,
+      createdAt: now,
+    },
+    {
+      id: 2,
+      customerName: "Sarah K.",
+      locationArea: "Kilimani",
+      rating: 5,
+      serviceType: "Stain Removal & Express",
+      reviewText: "Their express stain removal saved my wedding gown! Incredible service, fast communication, and friendly delivery team.",
+      approved: true,
+      createdAt: new Date(Date.now() - 86400000).toISOString(),
+    },
+    {
+      id: 3,
+      customerName: "Brian Njuguna",
+      locationArea: "Lavington",
+      rating: 5,
+      serviceType: "Home Linen & Duvet Care",
+      reviewText: "The duvet deep steam service is top tier. Smells super fresh and delivered in high quality protective covers.",
+      approved: true,
+      createdAt: new Date(Date.now() - 172800000).toISOString(),
+    },
+    {
+      id: 4,
+      customerName: "Mwangi Peter",
+      locationArea: "Karen",
+      rating: 5,
+      serviceType: "Wash & Fold Bulk",
+      reviewText: "Fast pickup in Karen, crisp ironing, and transparent rates. Highly recommended laundry studio in Nairobi.",
+      approved: true,
+      createdAt: new Date(Date.now() - 259200000).toISOString(),
+    },
+  ];
+}
+
 async function readDemoFeedback(): Promise<FeedbackItem[]> {
   try {
     const raw = await readFile(demoDataPath, "utf-8");
     const parsed = JSON.parse(raw);
-    return (parsed.feedback || []) as FeedbackItem[];
+    if (parsed && Array.isArray(parsed.feedback) && parsed.feedback.length > 0) {
+      return parsed.feedback as FeedbackItem[];
+    }
   } catch {
-    return [];
+    // Ignore read errors
   }
+  return getDefaultInitialFeedback();
 }
 
 async function writeDemoFeedback(items: FeedbackItem[]): Promise<void> {

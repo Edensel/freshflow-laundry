@@ -130,24 +130,165 @@ function mapOrder(row: OrderRow): Order {
   };
 }
 
+function getDefaultInitialOrders(): Order[] {
+  const now = new Date().toISOString();
+  return [
+    {
+      id: 1,
+      ticketId: "FFL-KE-2026-00001",
+      osTicketTicketId: null,
+      osTicketNumber: null,
+      customerName: "Jane Wanjiku",
+      customerPhone: "+254 789 920 270",
+      customerEmail: "jane.wanjiku@gmail.com",
+      serviceArea: "Westlands",
+      address: "Muthangari Drive, Apt 4B",
+      specialInstructions: "Handle silk blouses with care. Express 24h pickup.",
+      priceTotalKe: 2800,
+      paymentOption: "mpesa_till",
+      paymentStatus: "PENDING",
+      status: "OUT_FOR_DELIVERY",
+      createdAt: now,
+      updatedAt: now,
+      pickupDatetime: new Date(Date.now() - 3600000 * 4).toISOString(),
+      deliveryDatetime: new Date(Date.now() + 3600000 * 20).toISOString(),
+      serviceDetails: {
+        totalKe: 2800,
+        subtotalKe: 2800,
+        pickupDeliveryKe: 0,
+        requiresQuote: false,
+        lines: [
+          { id: "wash_fold", name: "Wash & Fold", category: "laundry", quantity: 10, unit: "kg", priceKe: 150, lineTotalKe: 1500 },
+          { id: "suit_2pc", name: "2-Piece Executive Suit", category: "laundry", quantity: 1, unit: "set", priceKe: 1300, lineTotalKe: 1300 },
+        ],
+      },
+    },
+    {
+      id: 2,
+      ticketId: "FFL-KE-2026-00002",
+      osTicketTicketId: null,
+      osTicketNumber: null,
+      customerName: "David Ochieng",
+      customerPhone: "+254 712 345 678",
+      customerEmail: "david.ochieng@yahoo.com",
+      serviceArea: "Kilimani",
+      address: "Dennis Pritt Road, Block C",
+      specialInstructions: "Stain removal on wool coat.",
+      priceTotalKe: 4500,
+      paymentOption: "mpesa_paybill",
+      paymentStatus: "PAID",
+      status: "IN_PROGRESS",
+      createdAt: new Date(Date.now() - 86400000).toISOString(),
+      updatedAt: new Date(Date.now() - 86400000).toISOString(),
+      pickupDatetime: new Date(Date.now() - 86400000).toISOString(),
+      deliveryDatetime: new Date(Date.now() + 86400000).toISOString(),
+      serviceDetails: {
+        totalKe: 4500,
+        subtotalKe: 4500,
+        pickupDeliveryKe: 0,
+        requiresQuote: false,
+        lines: [
+          { id: "heavy_coat", name: "Heavy Wool Coat", category: "laundry", quantity: 2, unit: "pcs", priceKe: 1250, lineTotalKe: 2500 },
+          { id: "duvet_king", name: "King Size Duvet Deep Steam", category: "laundry", quantity: 1, unit: "pc", priceKe: 2000, lineTotalKe: 2000 },
+        ],
+      },
+    },
+    {
+      id: 3,
+      ticketId: "FFL-KE-2026-00003",
+      osTicketTicketId: null,
+      osTicketNumber: null,
+      customerName: "Amina Hassan",
+      customerPhone: "+254 733 987 654",
+      customerEmail: "amina.hassan@outlook.com",
+      serviceArea: "Lavington",
+      address: "James Gichuru Road, Villa 12",
+      specialInstructions: "Store POS Counter Walk-in Booking.",
+      priceTotalKe: 6200,
+      paymentOption: "pay_on_delivery",
+      paymentStatus: "PAID",
+      status: "COMPLETED",
+      createdAt: new Date(Date.now() - 172800000).toISOString(),
+      updatedAt: new Date(Date.now() - 172800000).toISOString(),
+      pickupDatetime: new Date(Date.now() - 172800000).toISOString(),
+      deliveryDatetime: new Date(Date.now() - 86400000).toISOString(),
+      serviceDetails: {
+        totalKe: 6200,
+        subtotalKe: 6200,
+        pickupDeliveryKe: 0,
+        requiresQuote: false,
+        lines: [
+          { id: "house_deep", name: "House Deep Clean", category: "house_cleaning", quantity: 1, unit: "visit", priceKe: 4400, lineTotalKe: 4400 },
+          { id: "ironing_batch", name: "Executive Shirt Pressing", category: "laundry", quantity: 6, unit: "pcs", priceKe: 300, lineTotalKe: 1800 },
+        ],
+      },
+    },
+    {
+      id: 4,
+      ticketId: "FFL-KE-2026-00004",
+      osTicketTicketId: null,
+      osTicketNumber: null,
+      customerName: "Peter Kamau",
+      customerPhone: "+254 722 112 233",
+      customerEmail: "peter.kamau@gmail.com",
+      serviceArea: "Karen",
+      address: "Dagoretti Road, House 8",
+      specialInstructions: "Doorstep delivery completed.",
+      priceTotalKe: 3400,
+      paymentOption: "mpesa_till",
+      paymentStatus: "PAID",
+      status: "COMPLETED",
+      createdAt: new Date(Date.now() - 259200000).toISOString(),
+      updatedAt: new Date(Date.now() - 259200000).toISOString(),
+      pickupDatetime: new Date(Date.now() - 259200000).toISOString(),
+      deliveryDatetime: new Date(Date.now() - 172800000).toISOString(),
+      serviceDetails: {
+        totalKe: 3400,
+        subtotalKe: 3400,
+        pickupDeliveryKe: 0,
+        requiresQuote: false,
+        lines: [
+          { id: "wash_fold", name: "Wash & Fold", category: "laundry", quantity: 20, unit: "kg", priceKe: 150, lineTotalKe: 3000 },
+          { id: "carpet_steam", name: "Carpet Steam Refresh", category: "carpet_cleaning", quantity: 1, unit: "room", priceKe: 400, lineTotalKe: 400 },
+        ],
+      },
+    },
+  ];
+}
+
 async function ensureDemoDataFile(): Promise<DemoData> {
   try {
     const raw = await readFile(demoDataPath, "utf-8");
-    return JSON.parse(raw) as DemoData;
-  } catch {
-    const defaultData: DemoData = {
-      orders: [],
-      history: [],
-      notifications: [],
-    };
-    try {
-      await mkdir(path.dirname(demoDataPath), { recursive: true });
-      await writeFile(demoDataPath, JSON.stringify(defaultData, null, 2), "utf-8");
-    } catch {
-      // Ignore write errors on read-only serverless environments
+    const parsed = JSON.parse(raw) as DemoData;
+    if (parsed && Array.isArray(parsed.orders) && parsed.orders.length > 0) {
+      return parsed;
     }
-    return defaultData;
+  } catch {
+    // Ignore read errors
   }
+
+  const defaultOrders = getDefaultInitialOrders();
+  const defaultData: DemoData = {
+    orders: defaultOrders,
+    history: defaultOrders.map((o) => ({
+      id: o.id,
+      orderId: o.id,
+      oldStatus: null,
+      newStatus: o.status,
+      changedBy: "system",
+      changedAt: o.createdAt,
+      notes: "Initial demo order seeded.",
+    })),
+    notifications: [],
+  };
+
+  try {
+    await mkdir(path.dirname(demoDataPath), { recursive: true });
+    await writeFile(demoDataPath, JSON.stringify(defaultData, null, 2), "utf-8");
+  } catch {
+    // Ignore write errors on read-only serverless environments
+  }
+  return defaultData;
 }
 
 async function readDemoData(): Promise<DemoData> {

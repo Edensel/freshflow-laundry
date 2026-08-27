@@ -5,20 +5,9 @@ import { cookies } from "next/headers";
 
 const cookieName = "freshflow_admin";
 const demoSecret = "freshflow-demo";
-const validEmails = [
-  "admin@freshflowslaundry.com",
-  "ops@freshflowslaundry.com",
-  process.env.STAFF_NOTIFICATION_EMAIL || "staff@freshflowslaundry.com",
-];
 
 function adminToken() {
-  const secret =
-    process.env.ADMIN_SHARED_SECRET ||
-    (process.env.NODE_ENV !== "production" ? demoSecret : "");
-
-  if (!secret) {
-    return null;
-  }
+  const secret = process.env.ADMIN_SHARED_SECRET || demoSecret;
 
   return createHash("sha256")
     .update(secret)
@@ -30,25 +19,17 @@ export function isAdminConfigured() {
 }
 
 export function isAdminCredentials(email: string, password: string) {
-  const secret =
-    process.env.ADMIN_SHARED_SECRET ||
-    (process.env.NODE_ENV !== "production" ? demoSecret : "");
-
+  const secret = process.env.ADMIN_SHARED_SECRET || demoSecret;
   const cleanEmail = email.trim().toLowerCase();
 
-  // Allow any valid email format along with valid staff emails
   const isEmailValid = cleanEmail.includes("@") && cleanEmail.includes(".");
-  const isPasswordValid = Boolean(secret && password === secret);
+  const isPasswordValid = Boolean(password === secret);
 
   return isEmailValid && isPasswordValid;
 }
 
 export function adminPasswordHint() {
-  if (process.env.ADMIN_SHARED_SECRET || process.env.NODE_ENV === "production") {
-    return null;
-  }
-
-  return demoSecret;
+  return process.env.ADMIN_SHARED_SECRET || demoSecret;
 }
 
 export async function isAdminAuthenticated() {
